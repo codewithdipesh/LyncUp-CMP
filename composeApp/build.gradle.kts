@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -37,6 +38,8 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation("androidx.core:core-ktx:1.12.0")
             implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
