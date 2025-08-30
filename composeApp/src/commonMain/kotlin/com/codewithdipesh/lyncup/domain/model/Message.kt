@@ -1,6 +1,4 @@
-package com.codewithdipesh.lyncup.domain
-
-import kotlinx.serialization.Serializable
+package com.codewithdipesh.lyncup.domain.model
 
 data class Message(
     val id : String,

@@ -1,4 +1,4 @@
-package com.codewithdipesh.lyncup.domain
+package com.codewithdipesh.lyncup.domain.model
 
 import kotlinx.serialization.Serializable
 

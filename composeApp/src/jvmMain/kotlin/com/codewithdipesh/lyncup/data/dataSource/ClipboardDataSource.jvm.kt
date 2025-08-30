@@ -1,5 +1,8 @@
 package com.codewithdipesh.lyncup.data.dataSource
 
+import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
+import com.codewithdipesh.lyncup.domain.model.ClipBoardData
+import com.codewithdipesh.lyncup.getPlatform
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -14,6 +17,7 @@ import java.awt.datatransfer.StringSelection
 actual class ClipboardDataSource actual constructor(platformContext: Any) {
 
     private val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+    private val sharedPref = SharedPreference
     private var monitorJob : Job? = null
 
     actual suspend fun getClipboard(): String? {
@@ -44,7 +48,7 @@ actual class ClipboardDataSource actual constructor(platformContext: Any) {
        }
     }
 
-    actual fun startMonitoring(onChanged: (String) -> Unit) {
+    actual fun startMonitoring(onChanged: (ClipBoardData) -> Unit) {
         if(monitorJob?.isActive == true) return
         monitorJob = CoroutineScope(Dispatchers.IO).launch {
             var lastText : String? = null
@@ -53,7 +57,14 @@ actual class ClipboardDataSource actual constructor(platformContext: Any) {
                     val currentText = getClipboard()
                     if (currentText != null && currentText != lastText) {
                         lastText = currentText
-                        onChanged(currentText)
+                        onChanged(
+                            ClipBoardData(
+                                text = currentText,
+                                timeStamp = System.currentTimeMillis(),
+                                deviceId = sharedPref.getOrCreateDeviceId(),
+                                deviceName = getPlatform().name
+                            )
+                        )
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
