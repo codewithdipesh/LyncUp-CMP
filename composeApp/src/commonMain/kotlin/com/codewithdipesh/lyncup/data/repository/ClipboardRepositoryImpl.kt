@@ -1,7 +1,7 @@
 package com.codewithdipesh.lyncup.data.repository
 
 import com.codewithdipesh.lyncup.data.dataSource.ClipboardDataSource
-import com.codewithdipesh.lyncup.data.dataSource.NetworkDataSource
+import com.codewithdipesh.lyncup.data.network.SocketManager
 import com.codewithdipesh.lyncup.domain.model.ClipBoardData
 import com.codewithdipesh.lyncup.domain.model.Device
 import com.codewithdipesh.lyncup.domain.repository.ClipboardRepository
@@ -10,18 +10,18 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class ClipboardRepositoryImpl(
     private val clipboardDataSource: ClipboardDataSource,
-    private val networkDataSource: NetworkDataSource
+    private val socket : SocketManager
 ) : ClipboardRepository {
 
     private val _clipboardFlow = MutableStateFlow<ClipBoardData?>(null)
-    val clipboardFlow = _clipboardFlow.asStateFlow()
+    override val clipboardFlow = _clipboardFlow.asStateFlow()
 
     override suspend fun getClipboardContent(): String? {
         val text = clipboardDataSource.getClipboard()
         return text
     }
 
-    override suspend fun setClipboard(text: String): Boolean? {
+    override suspend fun setClipboard(text: String): Boolean {
         val success = clipboardDataSource.setClipboard(text = text)
         return success
     }
@@ -37,11 +37,12 @@ class ClipboardRepositoryImpl(
     }
 
     override suspend fun syncClipboardToDeice(
-        device: Device,
-        text: String
-    ): Boolean? {
+        clipboard: ClipBoardData
+    ): Boolean {
         return try {
-            val success = networkDataSource
+            socket.sendClipboard(clipboard)
+        } catch (e: Exception) {
+            false
         }
     }
 }
