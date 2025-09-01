@@ -16,7 +16,6 @@ import java.net.SocketTimeoutException
 
 actual class DeviceDiscoveryService {
     private var isDiscovering = false
-    private var discoveryJob: Job? = null
     private var listenerJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO)
     private val discoveredDevices = mutableMapOf<String, Device>()
@@ -32,13 +31,13 @@ actual class DeviceDiscoveryService {
         listenerJob = scope.launch {
             startListener(onDevicesFound)
         }
-
-        discoveryJob = scope.launch {
-
-        }
     }
 
     actual fun stopDiscovery() {
+        isDiscovering = false
+        listenerJob?.cancel()
+        listenerJob = null
+        discoveredDevices.clear()
     }
 
     private suspend fun startListener(onDevicesFound: (List<Device>) -> Unit){

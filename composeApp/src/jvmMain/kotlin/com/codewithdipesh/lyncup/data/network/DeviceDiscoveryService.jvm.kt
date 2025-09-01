@@ -2,16 +2,20 @@ package com.codewithdipesh.lyncup.data.network
 
 import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.domain.model.Device
+import com.codewithdipesh.lyncup.domain.model.DeviceType
 import com.codewithdipesh.lyncup.domain.model.ServiceAnnouncement
+import com.codewithdipesh.lyncup.getPlatform
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.DatagramPacket
 import java.net.DatagramSocket
+import java.net.InetAddress
 import java.net.SocketTimeoutException
 
 actual class DeviceDiscoveryService {
@@ -34,11 +38,58 @@ actual class DeviceDiscoveryService {
         }
 
         discoveryJob = scope.launch {
-
+           while (isDiscovering && isActive) {
+               broadcastDiscoveryMessage()
+           }
         }
     }
 
     actual fun stopDiscovery() {
+        isDiscovering = false
+        listenerJob?.cancel()
+        discoveryJob?.cancel()
+        discoveryJob = null
+        listenerJob = null
+        discoveredDevices.clear()
+    }
+
+    private suspend fun broadcastDiscoveryMessage() {
+        withContext(Dispatchers.IO) {
+            var socket : DatagramSocket? = null
+            try {
+                socket = DatagramSocket()
+                socket.broadcast = true
+
+                val broadcastMessage = ServiceAnnouncement(
+                    deviceId = SharedPreference.getOrCreateDeviceId(),
+                    deviceName = getPlatform().name,
+                    deviceType = DeviceType.DESKTOP,
+                    port = 8888
+                )
+                val messageJson = Json.encodeToString(broadcastMessage)
+                val data = messageJson.toByteArray()
+
+                val broadcastAddresses = listOf(
+                    InetAddress.getByName("255.255.255.255"),
+                    InetAddress.getByName("192.168.1.255"),
+                    InetAddress.getByName("192.168.0.255")
+                )
+
+                broadcastAddresses.forEach { address ->
+                    try {
+                        val packet = DatagramPacket(data, data.size, address, 8888)
+                        socket.send(packet)
+                    } catch (e: Exception) {
+                        // Continue with next address
+                    }
+                }
+
+            }  catch (e: Exception) {
+                println("Broadcast error: ${e.message}")
+            } finally {
+                socket?.close()
+            }
+        }
     }
 
     private suspend fun startListener(onDevicesFound: (List<Device>) -> Unit){
