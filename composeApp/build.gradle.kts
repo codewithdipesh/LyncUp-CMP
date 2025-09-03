@@ -40,6 +40,9 @@ kotlin {
             implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+            //koin DI
+            implementation("io.insert-koin:koin-android:4.0.0")
+            implementation("io.insert-koin:koin-androidx-compose:4.0.0")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -53,6 +56,12 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
             implementation("com.russhwolf:multiplatform-settings:1.3.0")
+            //koin DI
+            implementation("io.insert-koin:koin-core:4.0.0")
+            implementation("io.insert-koin:koin-compose:4.0.0")
+            implementation("io.insert-koin:koin-compose-viewmodel:4.0.0")
+            // ViewModel support for KMP
+            implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.8.2")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -62,6 +71,8 @@ kotlin {
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.oshi.core)
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")
+            //di
+            implementation("io.insert-koin:koin-core:4.0.0")
         }
     }
 }

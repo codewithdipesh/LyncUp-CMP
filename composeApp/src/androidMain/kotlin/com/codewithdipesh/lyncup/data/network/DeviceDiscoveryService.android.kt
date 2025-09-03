@@ -14,7 +14,7 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.SocketTimeoutException
 
-actual class DeviceDiscoveryService {
+actual class DeviceDiscoveryService actual constructor(){
     private var isDiscovering = false
     private var listenerJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO)

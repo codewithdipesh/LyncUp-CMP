@@ -9,7 +9,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.Socket
 
-actual class SocketManager actual constructor() {
+actual class SocketManager actual constructor(){
     private var socket: Socket? = null
 
     actual suspend fun connectToDevice(device: Device): Boolean {

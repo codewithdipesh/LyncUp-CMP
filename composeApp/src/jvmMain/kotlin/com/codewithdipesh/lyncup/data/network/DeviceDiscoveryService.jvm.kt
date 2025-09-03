@@ -18,7 +18,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.SocketTimeoutException
 
-actual class DeviceDiscoveryService {
+actual class DeviceDiscoveryService actual constructor(){
     private var isDiscovering = false
     private var discoveryJob: Job? = null
     private var listenerJob: Job? = null
