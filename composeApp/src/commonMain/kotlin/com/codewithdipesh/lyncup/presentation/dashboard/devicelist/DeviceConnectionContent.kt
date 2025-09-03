@@ -1,0 +1,62 @@
+package com.codewithdipesh.lyncup.presentation.dashboard.devicelist
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.codewithdipesh.lyncup.domain.model.PlatformType
+
+@Composable
+fun DeviceConnectionContent(
+    state : DeviceListUI,
+    onAction : (DeviceListAction) -> Unit,
+    platform: PlatformType
+){
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ){
+        state.devices?.let {
+            it.forEach { device ->
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .background(Color.LightGray)
+                        .clickable {
+                            onAction(DeviceListAction.ConnectToDevice(device))
+                        }
+                ){
+                    Text(device.name)
+                }
+            }
+        }
+        Box(
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .background(Color.Green)
+                .clickable{
+                    onAction(DeviceListAction.StartDiscovery)
+                }
+        ){
+            when(platform){
+                PlatformType.MOBILE -> {
+                    Text("SCAN DEVICES")
+                }
+                PlatformType.DESKTOP -> {
+                    Text("START BROADCASTING")
+                }
+            }
+        }
+    }
+}
