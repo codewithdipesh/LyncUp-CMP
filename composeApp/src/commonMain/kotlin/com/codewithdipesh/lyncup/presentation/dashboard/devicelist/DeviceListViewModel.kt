@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codewithdipesh.lyncup.domain.model.Device
 import com.codewithdipesh.lyncup.domain.repository.DeviceRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -37,7 +38,10 @@ class DeviceListViewModel(
             }
             try {
                 deviceRepository.startDiscovery()
+                delay(30000)
+                stopDiscovery()
             } catch (e: Exception) {
+                stopDiscovery()
                 _state.value = _state.value.copy(
                     isDiscovering = false,
                     error = e.message ?: "Failed to start discovery"

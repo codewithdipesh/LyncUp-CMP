@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,21 +43,29 @@ fun DeviceConnectionContent(
             }
         }
         Box(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.size(
+                width = 200.dp,
+                height = 50.dp
+            )
                 .padding(horizontal = 16.dp)
                 .background(Color.Green)
                 .clickable{
                     onAction(DeviceListAction.StartDiscovery)
                 }
         ){
-            when(platform){
-                PlatformType.MOBILE -> {
-                    Text("SCAN DEVICES")
+            if(!state.isDiscovering){
+                when(platform){
+                    PlatformType.MOBILE -> {
+                        Text("SCAN DEVICES")
+                    }
+                    PlatformType.DESKTOP -> {
+                        Text("START BROADCASTING")
+                    }
                 }
-                PlatformType.DESKTOP -> {
-                    Text("START BROADCASTING")
-                }
+            }else{
+                Text("STOP")
             }
+
         }
     }
 }
