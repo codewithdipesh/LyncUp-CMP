@@ -1,8 +1,11 @@
 package com.codewithdipesh.lyncup.data.network
 
-import androidx.compose.ui.platform.Clipboard
+import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.domain.model.ClipBoardData
 import com.codewithdipesh.lyncup.domain.model.Device
+import com.codewithdipesh.lyncup.domain.model.DeviceType
+import com.codewithdipesh.lyncup.domain.model.HandShake
+import com.codewithdipesh.lyncup.getPlatform
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -17,6 +20,15 @@ actual class SocketManager actual constructor() {
             try {
                 socket = Socket(device.ip, device.port)
                 socket?.soTimeout = 10000
+
+                //SEND handshake
+                val hello = HandShake(
+                    id = SharedPreference.getOrCreateDeviceId(),
+                    name = getPlatform().name,
+                    deviceType = DeviceType.ANDROID
+                )
+                val json = Json.encodeToString(hello)
+                socket?.getOutputStream()?.write("HELLO:$json".toByteArray())
                 true
             } catch (e: Exception){
                 false
@@ -44,4 +56,9 @@ actual class SocketManager actual constructor() {
         socket?.close()
         socket = null
     }
+
+    //not needed for mobile
+    actual suspend fun startServer(): Boolean = false
+    actual suspend fun stopServer() {}
+    actual fun isServerRunning(): Boolean = false
 }

@@ -110,14 +110,15 @@ actual class DeviceDiscoveryService actual constructor(){
                        val serviceAnnouncement = Json.decodeFromString<ServiceAnnouncement>(message)
 
                        //avoid own device
-                       if (serviceAnnouncement.deviceId != SharedPreference.getOrCreateDeviceId()) {
+                       if (serviceAnnouncement.deviceId != SharedPreference.getOrCreateDeviceId() &&
+                           serviceAnnouncement.deviceType != DeviceType.ANDROID) {
                            val device = Device(
                                id = serviceAnnouncement.deviceId,
                                name = serviceAnnouncement.deviceName,
                                ip = packet.address.hostAddress ?: "",
                                port = serviceAnnouncement.port,
                                deviceType = serviceAnnouncement.deviceType,
-                               isConnected = true,
+                               isConnected = false,
                                lastSeen = System.currentTimeMillis()
                            )
 
