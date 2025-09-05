@@ -2,6 +2,7 @@ package com.codewithdipesh.lyncup.data.repository
 
 import com.codewithdipesh.lyncup.data.network.DeviceDiscoveryService
 import com.codewithdipesh.lyncup.data.network.SocketManager
+import com.codewithdipesh.lyncup.domain.model.ClipBoardData
 import com.codewithdipesh.lyncup.domain.model.Device
 import com.codewithdipesh.lyncup.domain.repository.DeviceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,5 +64,11 @@ class DeviceRepositoryImpl(
         }
         updateDeviceConnectionStatus(device,false)
         return true
+    }
+
+    override suspend fun syncClipboard(onReceived: (ClipBoardData) -> Unit) {
+        socketManager.syncClipboard {
+            onReceived(it)
+        }
     }
 }

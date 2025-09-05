@@ -10,5 +10,4 @@ interface ClipboardRepository {
     suspend fun setClipboard(text : String): Boolean
     fun startClipboardMonitoring()
     fun stopClipboardMonitoring()
-    suspend fun syncClipboardToDeice(clipboard: ClipBoardData): Boolean
 }

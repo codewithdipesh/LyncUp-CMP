@@ -5,8 +5,10 @@ import com.codewithdipesh.lyncup.data.network.SocketManager
 import com.codewithdipesh.lyncup.domain.model.ClipBoardData
 import com.codewithdipesh.lyncup.domain.model.Device
 import com.codewithdipesh.lyncup.domain.repository.ClipboardRepository
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class ClipboardRepositoryImpl(
     private val clipboardDataSource: ClipboardDataSource,
@@ -29,20 +31,13 @@ class ClipboardRepositoryImpl(
     override fun startClipboardMonitoring() {
         clipboardDataSource.startMonitoring { newClipboard ->
             _clipboardFlow.value = newClipboard
+            GlobalScope.launch {
+                socket.sendClipboard(newClipboard)
+            }
         }
     }
 
     override fun stopClipboardMonitoring() {
         clipboardDataSource.stopMonitoring()
-    }
-
-    override suspend fun syncClipboardToDeice(
-        clipboard: ClipBoardData
-    ): Boolean {
-        return try {
-            socket.sendClipboard(clipboard)
-        } catch (e: Exception) {
-            false
-        }
     }
 }

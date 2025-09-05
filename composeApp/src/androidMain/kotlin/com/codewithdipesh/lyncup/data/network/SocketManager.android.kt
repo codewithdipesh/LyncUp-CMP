@@ -10,6 +10,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.net.Socket
 
 actual class SocketManager actual constructor() {
@@ -29,8 +31,19 @@ actual class SocketManager actual constructor() {
                 )
                 val json = Json.encodeToString(hello)
                 socket?.getOutputStream()?.write("HELLO:$json".toByteArray())
-                true
+                //check result
+                val reader = BufferedReader(InputStreamReader(socket?.getInputStream()))
+                val reply = reader.readLine()
+                if (reply == "ACCEPT") {
+                    true
+                } else {
+                    socket?.close()
+                    socket = null
+                    false
+                }
             } catch (e: Exception){
+                socket?.close()
+                socket = null
                 false
             }
         }
@@ -57,8 +70,26 @@ actual class SocketManager actual constructor() {
         socket = null
     }
 
+
+    actual suspend fun syncClipboard(onSyncClipBoard: (ClipBoardData) -> Unit) {
+        withContext(Dispatchers.IO) {
+            val reader = BufferedReader(InputStreamReader(socket?.getInputStream()))
+            while (socket!= null && socket?.isConnected == true) {
+                val message = reader.readLine() ?: break
+                if (message.startsWith("CLIPBOARD:")) {
+                    val clipboard = message.removePrefix("CLIPBOARD:")
+                    val clipboardData = Json.decodeFromString<ClipBoardData>(clipboard)
+                    onSyncClipBoard(clipboardData)
+                }
+            }
+        }
+    }
+
     //not needed for mobile
-    actual suspend fun startServer(): Boolean = false
+    actual suspend fun startServer(
+        onRequest: (HandShake, (Boolean) -> Unit) -> Unit,
+        onClipboardReceived: (ClipBoardData) -> Unit
+    ): Boolean = false
     actual suspend fun stopServer() {}
     actual fun isServerRunning(): Boolean = false
 }

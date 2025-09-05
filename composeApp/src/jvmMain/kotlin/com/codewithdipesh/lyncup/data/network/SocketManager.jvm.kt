@@ -8,16 +8,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.net.Socket
 
 actual class SocketManager actual constructor(){
     private val serverManager = ServerManager()
 
-    var onConnectionRequest: ((HandShake, (Boolean) -> Unit) -> Unit)? = null
-
-
     //not for desktop
     actual suspend fun connectToDevice(device: Device): Boolean = false
+    actual suspend fun syncClipboard(onSyncClipBoard: (ClipBoardData) -> Unit) {}
+
 
     actual suspend fun sendMessage(message: String): Boolean {
         return withContext(Dispatchers.IO) {
@@ -40,13 +41,16 @@ actual class SocketManager actual constructor(){
        serverManager.stopServer()
     }
 
-    actual suspend fun startServer(): Boolean {
+    actual suspend fun startServer(
+        onRequest: (HandShake, (Boolean) -> Unit) -> Unit,
+        onClipboardReceived: (ClipBoardData) -> Unit
+    ): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 serverManager.startServer(
                     port = 8888,
                     onRequest = { info, decide ->
-                        onConnectionRequest?.invoke(info,decide)
+                        onRequest(info,decide)
                     },
                     onMessage = {message ->
                         when {
@@ -55,7 +59,7 @@ actual class SocketManager actual constructor(){
                                     val clipboardData = Json.decodeFromString<ClipBoardData>(
                                         message.substringAfter("CLIPBOARD:")
                                     )
-                                    //TODO update UI
+                                    onClipboardReceived(clipboardData)
                                 } catch (e: Exception) {
                                     println("Failed to parse clipboard data: ${e.message}")
                                 }

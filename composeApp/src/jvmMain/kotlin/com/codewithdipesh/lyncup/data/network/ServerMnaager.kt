@@ -24,13 +24,6 @@ class ServerManager {
     private var onClientConnected: ((String) -> Unit)? = null
     private var onClientDisconnected: ((String) -> Unit)? = null
 
-    private var onConnectionRequest: ((String) -> Boolean)? = null
-
-    // Set callback for connection approval
-    fun setConnectionRequestHandler(handler: (String) -> Boolean) {
-        onConnectionRequest = handler
-    }
-
     fun startServer(
         port:Int = 8888,
         onMessage : (String) -> Unit = {},
@@ -74,10 +67,12 @@ class ServerManager {
 
                     //rejected
                     if(!decision.get()){
+                        clientSocket.getOutputStream().write("REJECTED".toByteArray())
                         clientSocket.close()
                         continue
                     }
                     //accepted
+                    clientSocket.getOutputStream().write("ACCEPTED".toByteArray())
                     clients.add(clientSocket)
                     val clientAddress = clientSocket.inetAddress.hostAddress
                     onClientConnected?.invoke(clientAddress)
