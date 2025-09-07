@@ -4,6 +4,7 @@ import com.codewithdipesh.lyncup.data.network.DeviceDiscoveryService
 import com.codewithdipesh.lyncup.data.network.SocketManager
 import com.codewithdipesh.lyncup.domain.model.ClipBoardData
 import com.codewithdipesh.lyncup.domain.model.Device
+import com.codewithdipesh.lyncup.domain.model.HandShake
 import com.codewithdipesh.lyncup.domain.repository.DeviceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,6 +65,20 @@ class DeviceRepositoryImpl(
         }
         updateDeviceConnectionStatus(device,false)
         return true
+    }
+
+    override suspend fun startServer(
+        onRequest: (HandShake, (Boolean) -> Unit) -> Unit,
+        onClipboardReceived: (ClipBoardData) -> Unit
+    ): Boolean {
+        return socketManager.startServer(
+            onRequest,
+            onClipboardReceived
+        )
+    }
+
+    override suspend fun stopServer() {
+        socketManager.stopServer()
     }
 
     override suspend fun syncClipboard(onReceived: (ClipBoardData) -> Unit) {
