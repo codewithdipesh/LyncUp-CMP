@@ -7,9 +7,10 @@ import com.codewithdipesh.lyncup.data.network.DeviceDiscoveryService
 import com.codewithdipesh.lyncup.data.network.SocketManager
 import com.codewithdipesh.lyncup.data.repository.ClipboardRepositoryImpl
 import com.codewithdipesh.lyncup.data.repository.DeviceRepositoryImpl
+import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
 import com.codewithdipesh.lyncup.domain.repository.ClipboardRepository
 import com.codewithdipesh.lyncup.domain.repository.DeviceRepository
-import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceListViewModel
+import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -23,6 +24,7 @@ val commonModule = module {
     //services
     single { DeviceDiscoveryService() }
     single { SocketManager() }
+
 
     //repository
     single<ClipboardRepository> {
@@ -38,10 +40,19 @@ val commonModule = module {
         )
     }
 
+    //background service
+    single {
+        LyncUpBackgroundService(
+        deviceRepository = get(),
+        clipboardRepository = get()
+    )}
+
     //viewModels
     viewModel {
-        DeviceListViewModel(
-            deviceRepository = get()
+        DeviceViewModel(
+            deviceRepository = get(),
+            clipboardRepository = get(),
+            backgroundService = get()
         )
     }
 }

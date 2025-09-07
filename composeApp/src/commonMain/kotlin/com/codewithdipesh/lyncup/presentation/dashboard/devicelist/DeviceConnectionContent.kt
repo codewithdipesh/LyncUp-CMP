@@ -28,44 +28,47 @@ fun DeviceConnectionContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ){
-        state.devices?.let {
-            it.forEach { device ->
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .background(Color.LightGray)
-                        .clickable {
-                            onAction(DeviceListAction.ConnectToDevice(device))
-                        }
-                ){
-                    Text(device.name)
+        if(state.connectedDevice == null){
+            state.devices?.let {
+                it.forEach { device ->
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .background(Color.LightGray)
+                            .clickable {
+                                if(!state.isDiscovering){
+                                    onAction(DeviceListAction.ConnectToDevice(device))
+                                }
+                            }
+                    ){
+                        Text(device.name)
+                    }
                 }
             }
+        }else{
+            Text("Connected to ${state.connectedDevice.name}")
         }
-        Box(
-            modifier = Modifier.size(
-                width = 200.dp,
-                height = 50.dp
-            )
-                .padding(horizontal = 16.dp)
-                .background(Color.Green)
-                .clickable{
-                    onAction(DeviceListAction.StartDiscovery)
-                }
-        ){
-            if(!state.isDiscovering){
-                when(platform){
-                    PlatformType.MOBILE -> {
-                        Text("SCAN DEVICES")
+        if (platform == PlatformType.MOBILE){
+            Box(
+                modifier = Modifier.size(
+                    width = 200.dp,
+                    height = 50.dp
+                )
+                    .padding(horizontal = 16.dp)
+                    .background(Color.Green)
+                    .clickable{
+                        if(!state.isDiscovering){
+                            onAction(DeviceListAction.StartDiscovery)
+                        }
                     }
-                    PlatformType.DESKTOP -> {
-                        Text("START BROADCASTING")
-                    }
+            ){
+                if(!state.isDiscovering){
+                    Text("SCAN DEVICES")
+                }else{
+                    Text("STOP")
                 }
-            }else{
-                Text("STOP")
-            }
 
+            }
         }
     }
 }
