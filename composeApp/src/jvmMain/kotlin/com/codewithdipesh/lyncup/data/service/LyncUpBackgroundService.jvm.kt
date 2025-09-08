@@ -7,13 +7,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import org.koin.java.KoinJavaComponent.inject
+import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 actual class LyncUpBackgroundService actual constructor(
     private val deviceRepository: DeviceRepository,
     private val clipboardRepository: ClipboardRepository
-) {
-    private val connectionApproval : ConnectionApprovalCoordinator by inject(ConnectionApprovalCoordinator::class.java)
+) : KoinComponent {
+    private val connectionApproval : ConnectionApprovalCoordinator by inject()
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var isServerRunning = false
 
@@ -28,22 +30,20 @@ actual class LyncUpBackgroundService actual constructor(
 
         isServerRunning = true
         serviceScope.launch {
+            println("Svc: starting server & discovery")
             deviceRepository.startServer(
-                onRequest = {handshake,decide->
-                    launch {
+                onRequest = { handshake, decide ->
+                    serviceScope.launch {
+                        println("Svc: onRequest from ${handshake}")
                         val approved = connectionApproval.onIncomingRequest(handshake)
-                        if(approved) {
-                            //sending
-                            startMonitoring()
-                        }
+                        println("Svc: decision=$approved")
+                        if (approved) startMonitoring()
                         decide(approved)
                     }
                 },
                 onClipboardReceived = {
-                    //receiving
-                    launch {
-                        clipboardRepository.setClipboard(it.text)
-                    }
+                    println("Svc: clipboard received")
+                    serviceScope.launch { clipboardRepository.setClipboard(it.text) }
                 }
             )
             deviceRepository.startDiscovery()

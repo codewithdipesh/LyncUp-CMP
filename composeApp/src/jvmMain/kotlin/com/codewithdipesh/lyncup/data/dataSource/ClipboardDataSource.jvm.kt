@@ -14,7 +14,7 @@ import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.StringSelection
 
-actual class ClipboardDataSource actual constructor(platformContext: Any) {
+actual class ClipboardDataSource actual constructor() {
 
     private val clipboard = Toolkit.getDefaultToolkit().systemClipboard
     private val sharedPref = SharedPreference

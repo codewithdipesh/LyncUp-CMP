@@ -17,9 +17,9 @@ import org.koin.dsl.module
 val commonModule = module {
 
     //Data sources
-    single{ ClipboardDataSource(get()) }
     single { SettingsProvider }
     single { SharedPreference }
+    single { ClipboardDataSource() }
 
     //services
     single { DeviceDiscoveryService() }

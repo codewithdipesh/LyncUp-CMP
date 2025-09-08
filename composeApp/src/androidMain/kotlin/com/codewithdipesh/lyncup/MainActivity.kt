@@ -14,7 +14,9 @@ import com.codewithdipesh.lyncup.domain.model.PlatformType
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceConnectionContent
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceViewModel
 import kotlinx.coroutines.launch
+import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.context.KoinContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +24,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            DeviceConnectionScreen()
+            KoinContext {
+                DeviceConnectionScreen()
+            }
         }
     }
 }

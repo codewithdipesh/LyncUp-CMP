@@ -1,5 +1,6 @@
 package com.codewithdipesh.lyncup.di
 
+import com.codewithdipesh.lyncup.data.dataSource.ClipboardDataSource
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.ConnectionApprovalCoordinator
 import org.koin.core.module.Module
 import org.koin.dsl.module

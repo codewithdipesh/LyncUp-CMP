@@ -3,6 +3,7 @@ package com.codewithdipesh.lyncup
 import androidx.compose.foundation.clickable
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,6 +18,7 @@ import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceConnect
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceListAction
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceViewModel
 import kotlinx.coroutines.launch
+import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
 fun main() = application {
@@ -25,7 +27,9 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "LyncUp",
     ) {
-        DeviceConnectionScreen()
+        KoinContext {
+            DeviceConnectionScreen()
+        }
     }
 }
 
@@ -44,36 +48,23 @@ fun DeviceConnectionScreen() {
         },
         platform = PlatformType.DESKTOP
     )
-    if(state.pendingRequest != null){
-        AlertDialog(
-            onDismissRequest = {
-                scope.launch {
-                    viewModel.handleAction(DeviceListAction.RejectConnection)
-                }
-            },
-            title = {
-                Text("Connection Request")
-            },
-            text = {
-                Text("You have a new connection request from ${state.pendingRequest!!.name}")
-            },
+
+    state.pendingRequest?.let { req ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { /* block dismiss */ },
+            title = { androidx.compose.material3.Text("Connection request") },
+            text = { androidx.compose.material3.Text("${req.name} wants to connect") },
             confirmButton = {
-                Text("Accept",
-                    modifier = Modifier.clickable {
-                        scope.launch {
-                            viewModel.handleAction(DeviceListAction.ApproveConnection)
-                        }
-                    }
-                )
+                androidx.compose.material3.TextButton(
+                    onClick = { scope.launch {
+                        viewModel.handleAction(DeviceListAction.ApproveConnection)
+                    } }
+                ) { androidx.compose.material3.Text("Approve") }
             },
             dismissButton = {
-                Text("Reject",
-                    modifier = Modifier.clickable {
-                        scope.launch {
-                            viewModel.handleAction(DeviceListAction.RejectConnection)
-                        }
-                    }
-                )
+                androidx.compose.material3.TextButton(
+                    onClick = { scope.launch { viewModel.handleAction(DeviceListAction.RejectConnection) } }
+                ) { androidx.compose.material3.Text("Reject") }
             }
         )
     }

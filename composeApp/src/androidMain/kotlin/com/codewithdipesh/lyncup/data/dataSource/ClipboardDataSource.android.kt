@@ -3,6 +3,7 @@ package com.codewithdipesh.lyncup.data.dataSource
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import com.codewithdipesh.lyncup.AppContextHolder
 import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.domain.model.ClipBoardData
 import com.codewithdipesh.lyncup.getPlatform
@@ -12,9 +13,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-actual class ClipboardDataSource actual constructor(platformContext: Any) {
+actual class ClipboardDataSource actual constructor() {
 
-    private val context = platformContext as Context
+    private val context = AppContextHolder.app
     private val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     private val sharedPref = SharedPreference
     private var listener : ClipboardManager.OnPrimaryClipChangedListener? = null
