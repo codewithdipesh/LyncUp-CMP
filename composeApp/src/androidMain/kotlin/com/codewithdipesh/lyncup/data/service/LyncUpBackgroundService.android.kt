@@ -21,7 +21,7 @@ actual class LyncUpBackgroundService actual constructor(
         serviceScope.launch {
             //received
             deviceRepository.syncClipboard { data->
-                launch {
+                serviceScope.launch {
                     clipboardRepository.setClipboard(data.text)
                 }
             }

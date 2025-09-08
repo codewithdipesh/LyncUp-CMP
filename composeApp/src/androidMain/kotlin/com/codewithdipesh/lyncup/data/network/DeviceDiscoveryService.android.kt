@@ -63,7 +63,7 @@ actual class DeviceDiscoveryService actual constructor(){
                 val broadcastMessage = ServiceAnnouncement(
                     deviceId = SharedPreference.getOrCreateDeviceId(),
                     deviceName = getPlatform().name,
-                    deviceType = DeviceType.DESKTOP,
+                    deviceType = DeviceType.ANDROID,
                     port = 8888
                 )
                 val messageJson = Json.encodeToString(broadcastMessage)

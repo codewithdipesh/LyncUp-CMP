@@ -20,6 +20,7 @@ class DeviceRepositoryImpl(
     private var connectedDevice: Device? = null
 
     override suspend fun startDiscovery() {
+        _deviceFlow.value = emptyList()
         discoveryService.startDiscovery { devices ->
             val updatedDevices = devices.map { device ->
                 if(device.id == connectedDevice?.id ) {
@@ -34,7 +35,6 @@ class DeviceRepositoryImpl(
 
     override suspend fun stopDiscovery() {
         discoveryService.stopDiscovery()
-        _deviceFlow.value = emptyList()
     }
 
     override suspend fun connectToDevice(device: Device): Boolean {

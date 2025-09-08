@@ -30,11 +30,11 @@ actual class SocketManager actual constructor() {
                     deviceType = DeviceType.ANDROID
                 )
                 val json = Json.encodeToString(hello)
-                socket?.getOutputStream()?.write("HELLO:$json".toByteArray())
+                socket?.getOutputStream()?.write("HELLO:$json/n".toByteArray())
                 //check result
                 val reader = BufferedReader(InputStreamReader(socket?.getInputStream()))
                 val reply = reader.readLine()
-                if (reply == "ACCEPT") {
+                if (reply == "ACCEPTED") {
                     true
                 } else {
                     socket?.close()
@@ -62,7 +62,7 @@ actual class SocketManager actual constructor() {
 
     actual suspend fun sendClipboard(clipboard: ClipBoardData): Boolean {
         val clipboardMessage = Json.encodeToString(clipboard)
-        return sendMessage("CLIPBOARD:$clipboardMessage")
+        return sendMessage("CLIPBOARD:$clipboardMessage/n")
     }
 
     actual fun disconnect() {
