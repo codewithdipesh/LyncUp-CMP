@@ -30,8 +30,11 @@ actual class DeviceViewModel actual constructor(
             backgroundService.startService()
             observerDevices()
             connectionApproval.requests.collect {request ->
-               _state.update {
-                   it.copy(pendingRequest = request)
+               if(request != null){
+                   println("Svc: viewmodel request received onRequest from ${request}")
+                   _state.update {
+                       it.copy(pendingRequest = request)
+                   }
                }
             }
         }
@@ -44,9 +47,15 @@ actual class DeviceViewModel actual constructor(
             DeviceListAction.StartDiscovery -> startDiscovery()
             DeviceListAction.ApproveConnection -> {
                 connectionApproval.approve()
+                _state.update {
+                    it.copy(pendingRequest = null)
+                }
             }
             DeviceListAction.RejectConnection -> {
                 connectionApproval.reject()
+                _state.update {
+                    it.copy(pendingRequest = null)
+                }
             }
         }
     }
