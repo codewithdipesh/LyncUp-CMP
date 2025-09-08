@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import java.io.BufferedReader
@@ -14,6 +15,8 @@ import java.net.ServerSocket
 import java.net.Socket
 import java.util.Collections
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 class ServerManager {
     private var serverSocket : ServerSocket? = null
@@ -42,49 +45,73 @@ class ServerManager {
                 serverSocket = ServerSocket(port)
                 while(isActive && !serverSocket!!.isClosed){
                     val clientSocket = serverSocket!!.accept()
-                    clientSocket.soTimeout = 5000
-
-                    //first chunk as handshake
-                    val reader = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
-                    val buf = CharArray(2048)
-                    val n = reader.read(buf)
-                    val firstChunk = if (n > 0) String(buf, 0, n) else ""
-
-                    lateinit var hello : HandShake
-                    if (firstChunk.startsWith("HELLO:")) {
-                        runCatching {
-                            val json = firstChunk.removePrefix("HELLO:")
-                            hello = Json.decodeFromString(HandShake.serializer(), json)
-                        }
-                    }
-                    //ask UI
-                    val decision = CompletableFuture<Boolean>()
-                    onRequest(
-                        HandShake(hello.id,hello.name,hello.deviceType)
-                    ){approved ->
-                        decision.complete(approved)
-                    }
-
-                    //rejected
-                    if(!decision.get()){
-                        clientSocket.getOutputStream().write("REJECTED".toByteArray())
-                        clientSocket.close()
-                        continue
-                    }
-                    //accepted
-                    clientSocket.getOutputStream().write("ACCEPTED".toByteArray())
-                    clients.add(clientSocket)
-                    val clientAddress = clientSocket.inetAddress.hostAddress
-                    onClientConnected?.invoke(clientAddress)
-
-                    //handle client in separate coroutine
-                    launch {
-                        handleClient(clientSocket, clientAddress)
-                    }
+                    handleConnection(clientSocket, onRequest, onConnect)
                 }
             } catch (e: Exception) {
-                // Handle exception
+                println("Server error: ${e.message}")
             }
+        }
+    }
+
+    private suspend fun handleConnection(
+        clientSocket: Socket,
+        onRequest: (HandShake, (Boolean) -> Unit) -> Unit,
+        onConnect: (String) -> Unit
+    ) {
+        try {
+            clientSocket.soTimeout = 30000 // ✅ Longer timeout for user decision
+
+            // Read handshake
+            val reader = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
+            val buf = CharArray(2048)
+            val n = reader.read(buf)
+            val firstChunk = if (n > 0) String(buf, 0, n) else ""
+
+            val hello = if (firstChunk.startsWith("HELLO:")) {
+                runCatching {
+                    val json = firstChunk.removePrefix("HELLO:")
+                    Json.decodeFromString<HandShake>(json)
+                }.getOrNull()
+            } else null
+
+            if (hello == null) {
+                clientSocket.getOutputStream().write("REJECTED\n".toByteArray())
+                clientSocket.close()
+                return
+            }
+
+            //proper waiting
+            val decision = CompletableFuture<Boolean>()
+            onRequest(hello) { approved ->
+                decision.complete(approved)
+            }
+
+            //Wait for user decision
+            val approved = withContext(Dispatchers.IO) {
+                decision.get(30, TimeUnit.SECONDS) // 30 second timeout
+            }
+
+            if (!approved) {
+                clientSocket.getOutputStream().write("REJECTED\n".toByteArray())
+                clientSocket.close()
+                return //Exit completely if rejected
+            }
+
+            //Only reach here if approved
+            clientSocket.getOutputStream().write("ACCEPTED\n".toByteArray())
+            clients.add(clientSocket)
+            val clientAddress = clientSocket.inetAddress.hostAddress ?: "unknown"
+            onConnect(clientAddress)
+
+            // Now handle client messages
+            handleClient(clientSocket, clientAddress)
+
+        } catch (e: TimeoutException) {
+            println("Connection timeout - no user response")
+            clientSocket.close()
+        } catch (e: Exception) {
+            println("Connection error: ${e.message}")
+            clientSocket.close()
         }
     }
 
