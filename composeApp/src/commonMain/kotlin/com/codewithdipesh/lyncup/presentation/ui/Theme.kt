@@ -24,6 +24,7 @@ val LyncUpColorScheme = lightColorScheme(
 fun LyncUpTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = LyncUpColorScheme,
+        typography = typography,
         content = content
     )
 }
