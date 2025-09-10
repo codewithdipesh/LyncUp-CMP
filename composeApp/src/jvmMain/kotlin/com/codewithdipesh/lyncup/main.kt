@@ -17,6 +17,7 @@ import com.codewithdipesh.lyncup.domain.model.PlatformType
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceConnectionContent
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceListAction
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceViewModel
+import com.codewithdipesh.lyncup.presentation.ui.LyncUpTheme
 import kotlinx.coroutines.launch
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
@@ -28,7 +29,9 @@ fun main() = application {
         title = "LyncUp",
     ) {
         KoinContext {
-            DeviceConnectionScreen()
+            LyncUpTheme {
+                DeviceConnectionScreen()
+            }
         }
     }
 }

@@ -2,7 +2,7 @@ package com.codewithdipesh.lyncup.data.dataSource
 
 import com.codewithdipesh.lyncup.domain.model.ClipBoardData
 
-actual class ClipboardDataSource actual constructor(platformContext: Any) {
+actual class ClipboardDataSource actual constructor() {
     actual suspend fun getClipboard(): String? {
         TODO("Not yet implemented")
     }

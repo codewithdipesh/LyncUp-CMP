@@ -56,6 +56,8 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
             implementation("com.russhwolf:multiplatform-settings:1.3.0")
+            //resources
+            implementation(compose.components.resources)
             //koin DI
             implementation("io.insert-koin:koin-core:4.0.0")
             implementation("io.insert-koin:koin-compose:4.0.0")
@@ -118,4 +120,10 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "com.codewithdipesh.lyncup"
+    generateResClass = always
 }
