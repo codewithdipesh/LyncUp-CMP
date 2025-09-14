@@ -26,7 +26,13 @@ actual class LyncUpBackgroundService actual constructor(
     //set clipboard received from other device
 
     actual fun startService() {
-        if(isServerRunning) return
+        if(isServerRunning){
+            //if server running but i disconnect so start the discovery again
+            serviceScope.launch {
+                deviceRepository.startDiscovery()
+                return@launch
+            }
+        }
 
         isServerRunning = true
         serviceScope.launch {
@@ -37,7 +43,10 @@ actual class LyncUpBackgroundService actual constructor(
                         println("Svc: onRequest from ${handshake}")
                         val approved = connectionApproval.onIncomingRequest(handshake)
                         println("Svc: decision=$approved")
-                        if (approved) startMonitoring()
+                        if (approved) {
+                            deviceRepository.stopDiscovery()
+                            startMonitoring()
+                        }
                         decide(approved)
                     }
                 },
