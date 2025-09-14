@@ -26,6 +26,9 @@ actual class DeviceViewModel actual constructor(
     actual val state: StateFlow<DeviceListUI> = _state.asStateFlow()
 
     init {
+        _state.update {
+            it.copy(isDiscovering = true)
+        }
         viewModelScope.launch {
             backgroundService.startService()
             observerDevices()
@@ -48,7 +51,10 @@ actual class DeviceViewModel actual constructor(
             DeviceListAction.ApproveConnection -> {
                 connectionApproval.approve()
                 _state.update {
-                    it.copy(pendingRequest = null)
+                    it.copy(
+                        pendingRequest = null,
+                        isDiscovering = false
+                    )
                 }
             }
             DeviceListAction.RejectConnection -> {
@@ -57,6 +63,8 @@ actual class DeviceViewModel actual constructor(
                     it.copy(pendingRequest = null)
                 }
             }
+
+            DeviceListAction.StopDiscovery -> {}
         }
     }
 
@@ -89,6 +97,11 @@ actual class DeviceViewModel actual constructor(
                 it.copy(error = e.message)
             }
         }
+        //for jvm if disconnected start discovery and other things again
+        backgroundService.startService()
+        _state.update {
+            it.copy(isDiscovering = true)
+        }
     }
 
     fun clearError() {
@@ -100,6 +113,11 @@ actual class DeviceViewModel actual constructor(
             deviceRepository.deviceFlow.collect { devices ->
                 _state.update {
                     it.copy(devices = devices)
+                }
+                if(devices.isNotEmpty()){
+                    _state.update {
+                        it.copy(deviceListShown = true)
+                    }
                 }
                 val currentConnectedDevice = devices.find { it.isConnected }
                 _state.update{

@@ -41,6 +41,7 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
             //koin DI
+            //koin-compose
             implementation("io.insert-koin:koin-android:4.0.0")
             implementation("io.insert-koin:koin-androidx-compose:4.0.0")
         }

@@ -29,6 +29,7 @@ actual class DeviceViewModel actual constructor(
             is DeviceListAction.ConnectToDevice -> connectToDevice(action.device)
             is DeviceListAction.DisconnectFromDevice -> disconnectFromDevice(action.device)
             DeviceListAction.StartDiscovery -> startDiscovery()
+            DeviceListAction.StopDiscovery -> stopDiscovery()
             DeviceListAction.ApproveConnection -> {} //no -op for mobile
             DeviceListAction.RejectConnection -> {}
         }
@@ -46,8 +47,6 @@ actual class DeviceViewModel actual constructor(
             }
             try {
                 deviceRepository.startDiscovery()
-                delay(30000)
-                stopDiscovery()
             } catch (e: Exception) {
                 stopDiscovery()
                 _state.value = _state.value.copy(
@@ -123,6 +122,11 @@ actual class DeviceViewModel actual constructor(
             deviceRepository.deviceFlow.collect { devices ->
                 _state.update {
                     it.copy(devices = devices)
+                }
+                if(devices.isNotEmpty()){
+                    _state.update {
+                        it.copy(deviceListShown = true)
+                    }
                 }
                 val currentConnectedDevice = devices.find { it.isConnected }
                 _state.update{
