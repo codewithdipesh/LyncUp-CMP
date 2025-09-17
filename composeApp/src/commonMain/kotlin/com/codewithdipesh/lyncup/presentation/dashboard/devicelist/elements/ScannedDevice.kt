@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,11 +27,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.codewithdipesh.lyncup.Platform
 import com.codewithdipesh.lyncup.Res
 import com.codewithdipesh.lyncup.android_icon
 import com.codewithdipesh.lyncup.apple_icon
 import com.codewithdipesh.lyncup.domain.model.Device
 import com.codewithdipesh.lyncup.domain.model.DeviceType
+import com.codewithdipesh.lyncup.domain.model.PlatformType
 import com.codewithdipesh.lyncup.plus_icon
 import com.codewithdipesh.lyncup.presentation.ui.regular
 import com.codewithdipesh.lyncup.windows_icon
@@ -38,6 +42,8 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun ScannedDevice(
     device : Device,
+    platform: PlatformType,
+    connectable : Boolean = true,
     onConnectClick : (Device) -> Unit
 ){
     val icon = when(device.deviceType){
@@ -64,7 +70,7 @@ fun ScannedDevice(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = if(platform == PlatformType.MOBILE) Arrangement.SpaceBetween else Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ){
             //icon
@@ -80,7 +86,10 @@ fun ScannedDevice(
                     contentDescription = null
                 )
             }
-
+            //spacing for desktop only
+            if(platform == PlatformType.DESKTOP){
+                Spacer(modifier = Modifier.width(100.dp))
+            }
             //name
             Column(
                 horizontalAlignment = Alignment.Start,
@@ -108,20 +117,24 @@ fun ScannedDevice(
                 )
             }
             //connect icon
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface)
-                    .clickable{
-                        onConnectClick(device)
-                    },
-                contentAlignment = Alignment.Center
-            ){
-                Image(
-                    painter = painterResource(Res.drawable.plus_icon) ,
-                    contentDescription = null
-                )
+            if(platform == PlatformType.MOBILE){
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.onSurface)
+                        .clickable{
+                           if(connectable)  onConnectClick(device)
+                        },
+                    contentAlignment = Alignment.Center
+                ){
+                    Icon(
+                        painter = painterResource(Res.drawable.plus_icon) ,
+                        contentDescription = null,
+                        tint = if(connectable) MaterialTheme.colorScheme.scrim
+                              else MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f)
+                    )
+                }
             }
 
         }

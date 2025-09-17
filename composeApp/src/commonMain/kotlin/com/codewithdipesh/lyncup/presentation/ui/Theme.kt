@@ -17,7 +17,8 @@ val LyncUpColorScheme = lightColorScheme(
     onSecondary = onSecondary,
     onSurface = onSurface,
 
-    surfaceVariant = surfaceVariant
+    surfaceVariant = surfaceVariant,
+    scrim = scrim
 )
 
 @Composable

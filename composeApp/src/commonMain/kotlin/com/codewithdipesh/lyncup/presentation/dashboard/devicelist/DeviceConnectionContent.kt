@@ -22,8 +22,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,9 +39,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.codewithdipesh.lyncup.Platform
 import com.codewithdipesh.lyncup.Res
 import com.codewithdipesh.lyncup.domain.model.PlatformType
 import com.codewithdipesh.lyncup.more_icon
+import com.codewithdipesh.lyncup.no_user_found
+import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.CustomSnackbar
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.DisConnectedScreen
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.ScannedDevice
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.TopBar
@@ -43,6 +53,7 @@ import com.codewithdipesh.lyncup.scan_icon
 import com.codewithdipesh.lyncup.scanning_icon
 import com.codewithdipesh.lyncup.settings_icon
 import com.codewithdipesh.lyncup.woman_on_laptop
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -51,6 +62,8 @@ fun DeviceConnectionContent(
     onAction : (DeviceListAction) -> Unit,
     platform: PlatformType
 ){
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -65,6 +78,21 @@ fun DeviceConnectionContent(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { it ->
+
+        //listen for outgoing request and show snack bar
+        LaunchedEffect(state.connectingRequest){
+            if (state.connectingRequest != null) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Pls Accept Connection in Desktop",
+                        actionLabel = "Trying to connect ${state.connectingRequest.name}",
+                        duration = SnackbarDuration.Indefinite
+                    )
+                }
+            } else {
+                snackbarHostState.currentSnackbarData?.dismiss()
+            }
+        }
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(it)
@@ -77,9 +105,9 @@ fun DeviceConnectionContent(
             ){
 
                 if( //desktop conditions
-                    (platform == PlatformType.DESKTOP && state.connectedDevice == null && !state.deviceListShown) ||
+                    (platform == PlatformType.DESKTOP && state.connectedDevice == null && state.devices.isEmpty()) ||
                     //or mobile condition
-                    (platform == PlatformType.MOBILE && state.connectedDevice == null && !state.isDiscovering && !state.deviceListShown )
+                    (platform == PlatformType.MOBILE && state.connectedDevice == null && !state.isDiscovering )
                 ){
                     DisConnectedScreen(
                         platform = platform,
@@ -89,34 +117,55 @@ fun DeviceConnectionContent(
                 //scanned device
                 if(
                     (platform == PlatformType.DESKTOP && state.connectedDevice == null && state.devices.isNotEmpty()) ||
-                    (platform == PlatformType.MOBILE && state.connectedDevice == null && state.isDiscovering || state.deviceListShown )
+                    (platform == PlatformType.MOBILE && state.connectedDevice == null && state.isDiscovering)
                 ){
-                    if(state.devices.isNotEmpty() && state.connectedDevice == null){
-                        Spacer(Modifier.height(16.dp))
-                        Column(
-                            modifier = Modifier.fillMaxWidth()
-                                .padding(horizontal = if(platform == PlatformType.MOBILE) 16.dp else 32.dp)
-                                .wrapContentHeight(),
-                            horizontalAlignment = Alignment.Start,
-                            verticalArrangement = Arrangement.Top
-                        ){
-                            Text(
-                                text = "Available Devices",
-                                style = TextStyle(
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    fontSize = 14.sp,
-                                    fontFamily = regular,
-                                    fontWeight = FontWeight.Medium
-                                )
+                    Spacer(Modifier.height(16.dp))
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(horizontal = if(platform == PlatformType.MOBILE) 16.dp else 32.dp)
+                            .wrapContentHeight(),
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.Top
+                    ){
+                        Text(
+                            text = "Available Devices",
+                            style = TextStyle(
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontSize = 14.sp,
+                                fontFamily = regular,
+                                fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            state.devices.forEach {
-                                ScannedDevice(
-                                    device = it,
-                                    onConnectClick = { onAction(DeviceListAction.ConnectToDevice(it)) }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        //empty device
+                        if(platform == PlatformType.MOBILE && state.devices.isEmpty() && state.isDiscovering){
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ){
+                                Image(
+                                    painter = painterResource(Res.drawable.no_user_found),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(160.dp)
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "No Devices Found",
+                                    style = TextStyle(
+                                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.65f),
+                                        fontSize = 14.sp,
+                                        fontFamily = regular
+                                    )
+                                )
                             }
+                        }
+                        state.devices.forEach {
+                            ScannedDevice(
+                                device = it,
+                                platform = platform,
+                                onConnectClick = { onAction(DeviceListAction.ConnectToDevice(it)) }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
                 }
@@ -169,6 +218,16 @@ fun DeviceConnectionContent(
                     }
 
                 }
+            }
+
+            //snack bar
+            if(platform == PlatformType.MOBILE){
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    snackbar = {
+                        CustomSnackbar(it)
+                    }
+                )
             }
 
         }

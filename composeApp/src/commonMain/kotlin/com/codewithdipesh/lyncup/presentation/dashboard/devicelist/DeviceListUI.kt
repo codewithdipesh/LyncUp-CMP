@@ -8,8 +8,7 @@ data class DeviceListUI(
     val isDiscovering: Boolean = false,
     val connectedDevice: Device? = null,
     val error: String? = null,
+    val connectingRequest: Device? = null, //only for mobiles
     val pendingRequest: HandShake? = null, //only for desktops
-
-    val deviceListShown : Boolean = false
 
 )

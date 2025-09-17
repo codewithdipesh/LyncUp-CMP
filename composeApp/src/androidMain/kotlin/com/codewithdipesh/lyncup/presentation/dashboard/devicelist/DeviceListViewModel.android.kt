@@ -71,13 +71,16 @@ actual class DeviceViewModel actual constructor(
 
     actual suspend fun connectToDevice(device: Device): Boolean {
         _state.update {
-            it.copy(error = null)
+            it.copy(
+                error = null,
+                connectingRequest = device
+            )
         }
         return try {
             val connected = deviceRepository.connectToDevice(device)
             if(connected){
                 _state.update {
-                    it.copy(connectedDevice =  device)
+                    it.copy(connectedDevice =  device,connectingRequest = null)
                 }
                 //connected successfully so now
                 //stop discovery
@@ -86,13 +89,16 @@ actual class DeviceViewModel actual constructor(
                 backgroundService.startService()
             } else {
                 _state.update {
-                    it.copy(error = "Failed to connect to ${device.name}")
+                    it.copy(
+                        error = "Failed to connect to ${device.name}",
+                        connectingRequest = null
+                    )
                 }
             }
             connected
         } catch (e : Exception){
             _state.update {
-                it.copy(error = e.message ?: "Failed to connect to ${device.name}")
+                it.copy(error = e.message ?: "Failed to connect to ${device.name}",connectingRequest = null)
             }
             false
         }
@@ -122,11 +128,6 @@ actual class DeviceViewModel actual constructor(
             deviceRepository.deviceFlow.collect { devices ->
                 _state.update {
                     it.copy(devices = devices)
-                }
-                if(devices.isNotEmpty()){
-                    _state.update {
-                        it.copy(deviceListShown = true)
-                    }
                 }
                 val currentConnectedDevice = devices.find { it.isConnected }
                 _state.update{

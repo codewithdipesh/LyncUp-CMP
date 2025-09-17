@@ -14,3 +14,5 @@ val onSecondary = Color(0xFFFFFFFF)
 val onSurface = Color(0xFF0F1018)
 
 val surfaceVariant = Color(0xFF57528B)
+
+val scrim = Color(0xFF289B6C)
