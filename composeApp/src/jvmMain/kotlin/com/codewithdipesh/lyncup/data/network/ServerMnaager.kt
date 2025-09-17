@@ -66,7 +66,7 @@ class ServerManager {
             val buf = CharArray(2048)
             val n = reader.read(buf)
             val firstChunk = if (n > 0) String(buf, 0, n) else ""
-
+            println("Svc: $firstChunk")
             val hello = if (firstChunk.startsWith("HELLO:")) {
                 runCatching {
                     val json = firstChunk.removePrefix("HELLO:")
@@ -117,7 +117,7 @@ class ServerManager {
 
     fun sendMessageToAll(message: String){
         synchronized(clients) {
-            val data = message.toByteArray()
+            val data = (if (message.endsWith("\n")) message else "$message\n").toByteArray()
             clients.forEach { socket ->
                 try {
                     socket.getOutputStream().write(data)

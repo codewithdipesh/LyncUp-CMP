@@ -1,5 +1,6 @@
 package com.codewithdipesh.lyncup.data.network
 
+import android.util.Log
 import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.domain.model.ClipBoardData
 import com.codewithdipesh.lyncup.domain.model.Device
@@ -18,6 +19,7 @@ actual class SocketManager actual constructor() {
     private var socket: Socket? = null
 
     actual suspend fun connectToDevice(device: Device): Boolean {
+        Log.d("SocketManager", "reply: $device")
         return withContext(Dispatchers.IO) {
             try {
                 socket = Socket(device.ip, device.port)
@@ -30,10 +32,11 @@ actual class SocketManager actual constructor() {
                     deviceType = DeviceType.ANDROID
                 )
                 val json = Json.encodeToString(hello)
-                socket?.getOutputStream()?.write("HELLO:$json/n".toByteArray())
+                socket?.getOutputStream()?.write("HELLO:$json\n".toByteArray())
                 //check result
                 val reader = BufferedReader(InputStreamReader(socket?.getInputStream()))
                 val reply = reader.readLine()
+                Log.d("SocketManager", "reply: $reply")
                 if (reply == "ACCEPTED") {
                     true
                 } else {
@@ -62,7 +65,7 @@ actual class SocketManager actual constructor() {
 
     actual suspend fun sendClipboard(clipboard: ClipBoardData): Boolean {
         val clipboardMessage = Json.encodeToString(clipboard)
-        return sendMessage("CLIPBOARD:$clipboardMessage/n")
+        return sendMessage("CLIPBOARD:$clipboardMessage\n")
     }
 
     actual fun disconnect() {
@@ -73,6 +76,7 @@ actual class SocketManager actual constructor() {
 
     actual suspend fun syncClipboard(onSyncClipBoard: (ClipBoardData) -> Unit) {
         withContext(Dispatchers.IO) {
+            socket?.soTimeout = 0
             val reader = BufferedReader(InputStreamReader(socket?.getInputStream()))
             while (socket!= null && socket?.isConnected == true) {
                 val message = reader.readLine() ?: break

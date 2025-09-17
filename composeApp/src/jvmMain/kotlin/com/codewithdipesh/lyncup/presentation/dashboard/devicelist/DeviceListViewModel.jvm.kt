@@ -114,11 +114,6 @@ actual class DeviceViewModel actual constructor(
                 _state.update {
                     it.copy(devices = devices)
                 }
-                if(devices.isNotEmpty()){
-                    _state.update {
-                        it.copy(deviceListShown = true)
-                    }
-                }
                 val currentConnectedDevice = devices.find { it.isConnected }
                 _state.update{
                     it.copy(connectedDevice = currentConnectedDevice)
