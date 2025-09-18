@@ -64,6 +64,23 @@ fun DeviceConnectionContent(
 ){
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    //listen for outgoing request and show snack bar
+    LaunchedEffect(state.connectingRequest){
+        if (state.connectingRequest != null) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "Pls Accept Connection in Desktop",
+                    actionLabel = "Trying to connect ${state.connectingRequest.name}",
+                    duration = SnackbarDuration.Indefinite
+                )
+            }
+        } else {
+            snackbarHostState.currentSnackbarData?.dismiss()
+        }
+    }
+
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -79,20 +96,6 @@ fun DeviceConnectionContent(
         containerColor = MaterialTheme.colorScheme.background
     ) { it ->
 
-        //listen for outgoing request and show snack bar
-        LaunchedEffect(state.connectingRequest){
-            if (state.connectingRequest != null) {
-                scope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = "Pls Accept Connection in Desktop",
-                        actionLabel = "Trying to connect ${state.connectingRequest.name}",
-                        duration = SnackbarDuration.Indefinite
-                    )
-                }
-            } else {
-                snackbarHostState.currentSnackbarData?.dismiss()
-            }
-        }
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(it)
@@ -226,7 +229,10 @@ fun DeviceConnectionContent(
                     hostState = snackbarHostState,
                     snackbar = {
                         CustomSnackbar(it)
-                    }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 70.dp)
                 )
             }
 
