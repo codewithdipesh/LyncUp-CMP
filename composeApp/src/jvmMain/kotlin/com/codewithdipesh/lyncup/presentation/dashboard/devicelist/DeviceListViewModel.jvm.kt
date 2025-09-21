@@ -2,6 +2,7 @@ package com.codewithdipesh.lyncup.presentation.dashboard.devicelist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codewithdipesh.lyncup.data.network.ConnectivityObserver
 import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
 import com.codewithdipesh.lyncup.domain.model.ClipBoardData
 import com.codewithdipesh.lyncup.domain.model.Device
@@ -18,7 +19,8 @@ import org.koin.java.KoinJavaComponent.inject
 actual class DeviceViewModel actual constructor(
     private val deviceRepository: DeviceRepository,
     private val clipboardRepository: ClipboardRepository,
-    private val backgroundService: LyncUpBackgroundService
+    private val backgroundService: LyncUpBackgroundService,
+    private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     private val connectionApproval: ConnectionApprovalCoordinator by inject(ConnectionApprovalCoordinator::class.java)
@@ -30,6 +32,8 @@ actual class DeviceViewModel actual constructor(
             it.copy(isDiscovering = true)
         }
         viewModelScope.launch {
+            //wifi monitoring
+            checkWifiMonitoring()
             backgroundService.startService()
             observerDevices()
             connectionApproval.requests.collect {request ->
@@ -125,10 +129,30 @@ actual class DeviceViewModel actual constructor(
 
         }
     }
-    override fun onCleared() {
+    actual override fun onCleared() {
         super.onCleared()
+        stopWifiMonitoring()
         viewModelScope.launch {
             deviceRepository.stopDiscovery()
         }
+    }
+
+    actual fun checkWifiMonitoring() {
+        //starting observing
+        connectivityObserver.startObserving()
+
+        viewModelScope.launch {
+            connectivityObserver.isConnected.collect { isConnected ->
+                if (isConnected) {
+                    _state.update { it.copy(isWifiAvailable = true) }
+                } else {
+                    _state.update { it.copy(isWifiAvailable = false) }
+                }
+            }
+        }
+    }
+
+    actual fun stopWifiMonitoring() {
+        connectivityObserver.stopObserving()
     }
 }

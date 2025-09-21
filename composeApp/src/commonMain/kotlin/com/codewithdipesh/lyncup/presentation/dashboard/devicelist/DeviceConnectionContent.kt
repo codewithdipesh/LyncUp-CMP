@@ -100,126 +100,136 @@ fun DeviceConnectionContent(
             .fillMaxSize()
             .padding(it)
         ){
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
-            ){
-
-                if( //desktop conditions
-                    (platform == PlatformType.DESKTOP && state.connectedDevice == null && state.devices.isEmpty()) ||
-                    //or mobile condition
-                    (platform == PlatformType.MOBILE && state.connectedDevice == null && !state.isDiscovering )
-                ){
-                    DisConnectedScreen(
-                        platform = platform,
-                        state = state
-                    )
-                }
-                //scanned device
-                if(
-                    (platform == PlatformType.DESKTOP && state.connectedDevice == null && state.devices.isNotEmpty()) ||
-                    (platform == PlatformType.MOBILE && state.connectedDevice == null && state.isDiscovering)
-                ){
-                    Spacer(Modifier.height(16.dp))
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(horizontal = if(platform == PlatformType.MOBILE) 16.dp else 32.dp)
-                            .wrapContentHeight(),
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Top
-                    ){
-                        Text(
-                            text = "Available Devices",
-                            style = TextStyle(
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                fontSize = 14.sp,
-                                fontFamily = regular,
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        //empty device
-                        if(platform == PlatformType.MOBILE && state.devices.isEmpty() && state.isDiscovering){
-                            Column(
-                                modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ){
-                                Image(
-                                    painter = painterResource(Res.drawable.no_user_found),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(160.dp)
-                                )
-                                Text(
-                                    text = "No Devices Found",
-                                    style = TextStyle(
-                                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.65f),
-                                        fontSize = 14.sp,
-                                        fontFamily = regular
-                                    )
-                                )
-                            }
-                        }
-                        state.devices.forEach {
-                            ScannedDevice(
-                                device = it,
-                                platform = platform,
-                                onConnectClick = { onAction(DeviceListAction.ConnectToDevice(it)) }
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    }
-                }
-            }
-            //scan devices
-            if (platform == PlatformType.MOBILE){
-                Box(
+            if(state.isWifiAvailable){
+                Column(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp,vertical = 16.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(
-                            if(state.isDiscovering) MaterialTheme.colorScheme.primary.copy(0.3f)
-                            else MaterialTheme.colorScheme.primary
-                        )
-                        .clickable{
-                            if(!state.isDiscovering){
-                                onAction(DeviceListAction.StartDiscovery)
-                            }else{
-                                onAction(DeviceListAction.StopDiscovery)
-                            }
-                        },
-                    contentAlignment = Alignment.Center
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
                 ){
-                    Row(
-                        modifier = Modifier.padding(
-                            horizontal = 32.dp,
-                            vertical = 16.dp
-                        ),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.scanning_icon),
-                            modifier = Modifier.size(28.dp),
-                            contentDescription = "scan",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            text = if (!state.isDiscovering) "Scan For Devices" else "Stop",
-                            style = TextStyle(
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                fontFamily = regular,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
+
+                    if( //desktop conditions
+                        (platform == PlatformType.DESKTOP && state.connectedDevice == null && state.devices.isEmpty()) ||
+                        //or mobile condition
+                        (platform == PlatformType.MOBILE && state.connectedDevice == null && !state.isDiscovering )
+                    ){
+                        DisConnectedScreen(
+                            platform = platform,
+                            state = state
                         )
                     }
+                    //scanned device
+                    if(
+                        (platform == PlatformType.DESKTOP && state.connectedDevice == null && state.devices.isNotEmpty()) ||
+                        (platform == PlatformType.MOBILE && state.connectedDevice == null && state.isDiscovering)
+                    ){
+                        Spacer(Modifier.height(16.dp))
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(horizontal = if(platform == PlatformType.MOBILE) 16.dp else 32.dp)
+                                .wrapContentHeight(),
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.Top
+                        ){
+                            Text(
+                                text = "Available Devices",
+                                style = TextStyle(
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontSize = 14.sp,
+                                    fontFamily = regular,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            //empty device
+                            if(platform == PlatformType.MOBILE && state.devices.isEmpty() && state.isDiscovering){
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ){
+                                    Image(
+                                        painter = painterResource(Res.drawable.no_user_found),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(160.dp)
+                                    )
+                                    Text(
+                                        text = "No Devices Found",
+                                        style = TextStyle(
+                                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.65f),
+                                            fontSize = 14.sp,
+                                            fontFamily = regular
+                                        )
+                                    )
+                                }
+                            }
+                            state.devices.forEach {
+                                ScannedDevice(
+                                    device = it,
+                                    platform = platform,
+                                    onConnectClick = { onAction(DeviceListAction.ConnectToDevice(it)) }
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
+                    }
+                }
+                //scan devices
+                if (platform == PlatformType.MOBILE){
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp,vertical = 16.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if(state.isDiscovering) MaterialTheme.colorScheme.primary.copy(0.3f)
+                                else MaterialTheme.colorScheme.primary
+                            )
+                            .clickable{
+                                if(!state.isDiscovering){
+                                    onAction(DeviceListAction.StartDiscovery)
+                                }else{
+                                    onAction(DeviceListAction.StopDiscovery)
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ){
+                        Row(
+                            modifier = Modifier.padding(
+                                horizontal = 32.dp,
+                                vertical = 16.dp
+                            ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.scanning_icon),
+                                modifier = Modifier.size(28.dp),
+                                contentDescription = "scan",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = if (!state.isDiscovering) "Scan For Devices" else "Stop",
+                                style = TextStyle(
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontFamily = regular,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
+                            )
+                        }
 
+                    }
+                }
+            }else{
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ){
+                    
                 }
             }
 

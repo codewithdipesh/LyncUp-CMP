@@ -1,6 +1,7 @@
 package com.codewithdipesh.lyncup
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -24,7 +25,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(1))
         super.onCreate(savedInstanceState)
-
         setContent {
             KoinContext {
                 LyncUpTheme {

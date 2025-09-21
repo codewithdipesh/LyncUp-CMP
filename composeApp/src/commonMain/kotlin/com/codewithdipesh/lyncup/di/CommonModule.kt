@@ -3,6 +3,7 @@ package com.codewithdipesh.lyncup.di
 import com.codewithdipesh.lyncup.data.dataSource.ClipboardDataSource
 import com.codewithdipesh.lyncup.data.dataStore.SettingsProvider
 import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
+import com.codewithdipesh.lyncup.data.network.ConnectivityObserver
 import com.codewithdipesh.lyncup.data.network.DeviceDiscoveryService
 import com.codewithdipesh.lyncup.data.network.SocketManager
 import com.codewithdipesh.lyncup.data.repository.ClipboardRepositoryImpl
@@ -24,6 +25,7 @@ val commonModule = module {
     //services
     single { DeviceDiscoveryService() }
     single { SocketManager() }
+    single { ConnectivityObserver() }
 
 
     //repository
@@ -52,7 +54,8 @@ val commonModule = module {
         DeviceViewModel(
             deviceRepository = get(),
             clipboardRepository = get(),
-            backgroundService = get()
+            backgroundService = get(),
+            connectivityObserver = get()
         )
     }
 }

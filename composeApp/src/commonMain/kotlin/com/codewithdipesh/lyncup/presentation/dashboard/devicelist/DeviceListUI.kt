@@ -10,5 +10,6 @@ data class DeviceListUI(
     val error: String? = null,
     val connectingRequest: Device? = null, //only for mobiles
     val pendingRequest: HandShake? = null, //only for desktops
+    val isWifiAvailable: Boolean = false
 
 )

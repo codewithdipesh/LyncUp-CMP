@@ -2,12 +2,12 @@ package com.codewithdipesh.lyncup.presentation.dashboard.devicelist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codewithdipesh.lyncup.data.network.ConnectivityObserver
 import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
-import com.codewithdipesh.lyncup.domain.model.ClipBoardData
 import com.codewithdipesh.lyncup.domain.model.Device
 import com.codewithdipesh.lyncup.domain.repository.ClipboardRepository
 import com.codewithdipesh.lyncup.domain.repository.DeviceRepository
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,12 +17,20 @@ import kotlinx.coroutines.launch
 actual class DeviceViewModel actual constructor(
     private val deviceRepository: DeviceRepository,
     private val clipboardRepository: ClipboardRepository,
-    private val backgroundService: LyncUpBackgroundService
+    private val backgroundService: LyncUpBackgroundService,
+    private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DeviceListUI())
     actual val state: StateFlow<DeviceListUI> = _state.asStateFlow()
 
+    private var observingJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            checkWifiMonitoring()
+        }
+    }
 
     actual suspend fun handleAction(action: DeviceListAction) {
         when(action){
@@ -140,11 +148,28 @@ actual class DeviceViewModel actual constructor(
 
         }
     }
-    override fun onCleared() {
-        super.onCleared()
-        viewModelScope.launch {
-            deviceRepository.stopDiscovery()
+
+    actual fun checkWifiMonitoring() {
+        if(observingJob!= null && observingJob?.isActive == true) return
+        //starting observing
+        connectivityObserver.startObserving()
+
+        observingJob = viewModelScope.launch {
+            connectivityObserver.isConnected.collect { isConnected ->
+                _state.update { it.copy(isWifiAvailable = isConnected) }
+            }
         }
     }
 
+
+    actual fun stopWifiMonitoring() {
+        observingJob?.cancel()
+        observingJob = null
+        connectivityObserver.stopObserving()
+    }
+
+    actual override fun onCleared() {
+        super.onCleared()
+        stopWifiMonitoring()
+    }
 }
