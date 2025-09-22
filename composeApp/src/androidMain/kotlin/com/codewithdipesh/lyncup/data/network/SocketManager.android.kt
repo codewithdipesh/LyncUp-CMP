@@ -85,6 +85,9 @@ actual class SocketManager actual constructor() {
                     val clipboardData = Json.decodeFromString<ClipBoardData>(clipboard)
                     onSyncClipBoard(clipboardData)
                 }
+                else if (message.startsWith("PING")) {
+                    socket?.getOutputStream()?.write("PONG:${SharedPreference.getOrCreateDeviceId()}\n".toByteArray())
+                }
             }
         }
     }
@@ -96,4 +99,22 @@ actual class SocketManager actual constructor() {
     ): Boolean = false
     actual suspend fun stopServer() {}
     actual fun isServerRunning(): Boolean = false
+    actual suspend fun ping(device: Device): Boolean {
+        return withContext(Dispatchers.IO) {
+            var tmp: Socket? = null
+            try {
+                tmp = Socket(device.ip, device.port).apply { soTimeout = 5000 }
+                // Send a simple ping
+                tmp.getOutputStream().write("PING\n".toByteArray())
+                val reply = BufferedReader(InputStreamReader(tmp.getInputStream())).readLine()
+                //return
+                reply != null && reply.startsWith("PONG:")
+                        && reply.removePrefix("PONG:") == device.id
+            } catch (e: Exception) {
+                false
+            } finally {
+                try { tmp?.close() } catch (_: Exception) {}
+            }
+        }
+    }
 }
