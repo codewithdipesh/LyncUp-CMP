@@ -9,8 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import java.net.Inet4Address
 import java.net.Inet6Address
+import java.net.InetAddress
 import java.net.NetworkInterface
 
 actual class ConnectivityObserver actual constructor() {
@@ -33,9 +35,10 @@ actual class ConnectivityObserver actual constructor() {
 
                 if (wasConnected != isCurrentlyConnected) {
                     _isConnected.value = isCurrentlyConnected
+                    delay(2000)
+                }else{
+                    delay(10000)
                 }
-
-                delay(30000) // Check every 15 seconds
             }
         }
     }
@@ -47,16 +50,8 @@ actual class ConnectivityObserver actual constructor() {
 
     private fun checkNetworkAvailability(): Boolean {
         return try {
-            val interfaces = NetworkInterface.getNetworkInterfaces()
-            interfaces.asSequence().any { networkInterface ->
-                networkInterface.isUp &&
-                        !networkInterface.isLoopback &&
-                        networkInterface.inetAddresses.asSequence().any { address ->
-                            !address.isLoopbackAddress &&
-                                    !address.isLinkLocalAddress &&
-                                    (address is Inet4Address || address is Inet6Address)
-                        }
-            }
+            val address = InetAddress.getByName("8.8.8.8")
+            address.isReachable(1200)
         } catch (e: Exception) {
             println("Error checking network interfaces: ${e.message}")
             false

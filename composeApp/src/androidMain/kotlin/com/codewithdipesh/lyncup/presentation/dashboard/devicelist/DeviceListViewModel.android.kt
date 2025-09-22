@@ -1,7 +1,10 @@
 package com.codewithdipesh.lyncup.presentation.dashboard.devicelist
 
+import android.content.Intent
+import androidx.compose.ui.text.font.FontVariation.Settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codewithdipesh.lyncup.AppContextHolder
 import com.codewithdipesh.lyncup.data.network.ConnectivityObserver
 import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
 import com.codewithdipesh.lyncup.domain.model.Device
@@ -40,6 +43,7 @@ actual class DeviceViewModel actual constructor(
             DeviceListAction.StopDiscovery -> stopDiscovery()
             DeviceListAction.ApproveConnection -> {} //no -op for mobile
             DeviceListAction.RejectConnection -> {}
+            DeviceListAction.GoToWifiSettings -> goToWifiSettings()
         }
     }
 
@@ -171,5 +175,12 @@ actual class DeviceViewModel actual constructor(
     actual override fun onCleared() {
         super.onCleared()
         stopWifiMonitoring()
+    }
+
+    actual fun goToWifiSettings() {
+        val context = AppContextHolder.context
+        val intent = Intent(android.provider.Settings.ACTION_WIFI_SETTINGS)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,12 +47,14 @@ import com.codewithdipesh.lyncup.more_icon
 import com.codewithdipesh.lyncup.no_user_found
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.CustomSnackbar
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.DisConnectedScreen
+import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.NoWifiScreen
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.ScannedDevice
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.TopBar
 import com.codewithdipesh.lyncup.presentation.ui.regular
 import com.codewithdipesh.lyncup.scan_icon
 import com.codewithdipesh.lyncup.scanning_icon
 import com.codewithdipesh.lyncup.settings_icon
+import com.codewithdipesh.lyncup.wifi_required
 import com.codewithdipesh.lyncup.woman_on_laptop
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -224,13 +227,12 @@ fun DeviceConnectionContent(
                     }
                 }
             }else{
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ){
-                    
-                }
+                NoWifiScreen(
+                    platform = platform,
+                    onAction = {
+                        onAction(DeviceListAction.GoToWifiSettings)
+                    }
+                )
             }
 
             //snack bar

@@ -69,6 +69,7 @@ actual class DeviceViewModel actual constructor(
             }
 
             DeviceListAction.StopDiscovery -> {}
+            DeviceListAction.GoToWifiSettings -> {}
         }
     }
 
@@ -143,6 +144,7 @@ actual class DeviceViewModel actual constructor(
 
         viewModelScope.launch {
             connectivityObserver.isConnected.collect { isConnected ->
+                println("Jvm -> isConnected : $isConnected")
                 if (isConnected) {
                     _state.update { it.copy(isWifiAvailable = true) }
                 } else {
@@ -154,5 +156,9 @@ actual class DeviceViewModel actual constructor(
 
     actual fun stopWifiMonitoring() {
         connectivityObserver.stopObserving()
+    }
+
+    actual fun goToWifiSettings() {
+        //no -op
     }
 }

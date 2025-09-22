@@ -23,6 +23,7 @@ expect class DeviceViewModel(
     suspend fun disconnectFromDevice(device: Device)
     fun checkWifiMonitoring()
     fun stopWifiMonitoring()
+    fun goToWifiSettings()
 
     override fun onCleared()
 }
