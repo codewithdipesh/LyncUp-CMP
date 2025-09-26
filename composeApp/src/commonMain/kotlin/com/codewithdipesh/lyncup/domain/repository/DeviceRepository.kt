@@ -17,4 +17,5 @@ interface DeviceRepository {
     ) : Boolean
     suspend fun stopServer()
     suspend fun syncClipboard(onReceived: (ClipBoardData) -> Unit)
+    suspend fun checkPrevSession() : Boolean
 }

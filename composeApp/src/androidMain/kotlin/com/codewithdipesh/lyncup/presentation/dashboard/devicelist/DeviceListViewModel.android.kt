@@ -5,6 +5,7 @@ import androidx.compose.ui.text.font.FontVariation.Settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codewithdipesh.lyncup.AppContextHolder
+import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.data.network.ConnectivityObserver
 import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
 import com.codewithdipesh.lyncup.domain.model.Device

@@ -16,8 +16,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.codewithdipesh.lyncup.di.initKoin
 import com.codewithdipesh.lyncup.domain.model.PlatformType
+import com.codewithdipesh.lyncup.presentation.dashboard.HomeScreen
+import com.codewithdipesh.lyncup.presentation.dashboard.SessionCheckViewModel
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceConnectionContent
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceListAction
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceViewModel
@@ -39,45 +42,37 @@ fun main() = application {
         }
         KoinContext {
             LyncUpTheme {
-                DeviceConnectionScreen()
+                val authViewModel : SessionCheckViewModel = koinViewModel()
+                val deviceViewModel: DeviceViewModel = koinViewModel()
+                val state by deviceViewModel.state.collectAsState()
+                val scope = rememberCoroutineScope()
+
+                HomeScreen(
+                    authViewModel = authViewModel,
+                    deviceViewModel = deviceViewModel,
+                    platformType = PlatformType.DESKTOP
+                )
+
+                state.pendingRequest?.let { req ->
+                    AlertDialog(
+                        onDismissRequest = { /* block dismiss */ },
+                        title = { Text("Connection request") },
+                        text = { Text("${req.name} wants to connect") },
+                        confirmButton = {
+                            TextButton(
+                                onClick = { scope.launch {
+                                    deviceViewModel.handleAction(DeviceListAction.ApproveConnection)
+                                } }
+                            ) { Text("Approve") }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { scope.launch { deviceViewModel.handleAction(DeviceListAction.RejectConnection) } }
+                            ) { Text("Reject") }
+                        }
+                    )
+                }
             }
         }
-    }
-}
-
-@Composable
-fun DeviceConnectionScreen() {
-    val viewModel: DeviceViewModel = koinViewModel()
-    val state by viewModel.state.collectAsState()
-    val scope = rememberCoroutineScope()
-
-    DeviceConnectionContent(
-        state = state,
-        onAction = {
-            scope.launch {
-                viewModel.handleAction(it)
-            }
-        },
-        platform = PlatformType.DESKTOP
-    )
-
-    state.pendingRequest?.let { req ->
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { /* block dismiss */ },
-            title = { androidx.compose.material3.Text("Connection request") },
-            text = { androidx.compose.material3.Text("${req.name} wants to connect") },
-            confirmButton = {
-                androidx.compose.material3.TextButton(
-                    onClick = { scope.launch {
-                        viewModel.handleAction(DeviceListAction.ApproveConnection)
-                    } }
-                ) { androidx.compose.material3.Text("Approve") }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(
-                    onClick = { scope.launch { viewModel.handleAction(DeviceListAction.RejectConnection) } }
-                ) { androidx.compose.material3.Text("Reject") }
-            }
-        )
     }
 }

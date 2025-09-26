@@ -25,7 +25,6 @@ actual class SocketManager actual constructor() {
                 socket = Socket(device.ip, device.port)
                 socket?.soTimeout = 10000
 
-                //SEND handshake
                 val hello = HandShake(
                     id = SharedPreference.getOrCreateDeviceId(),
                     name = getPlatform().name,
@@ -33,7 +32,7 @@ actual class SocketManager actual constructor() {
                 )
                 val json = Json.encodeToString(hello)
                 socket?.getOutputStream()?.write("HELLO:$json\n".toByteArray())
-                //check result
+
                 val reader = BufferedReader(InputStreamReader(socket?.getInputStream()))
                 val reply = reader.readLine()
                 Log.d("SocketManager", "reply: $reply")
@@ -45,6 +44,7 @@ actual class SocketManager actual constructor() {
                     false
                 }
             } catch (e: Exception){
+                Log.e("SocketManager", "connect error: ${e.message}", e)
                 socket?.close()
                 socket = null
                 false

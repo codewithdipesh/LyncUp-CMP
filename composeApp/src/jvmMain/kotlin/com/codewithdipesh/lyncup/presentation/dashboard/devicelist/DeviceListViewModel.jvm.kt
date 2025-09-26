@@ -2,6 +2,7 @@ package com.codewithdipesh.lyncup.presentation.dashboard.devicelist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.data.network.ConnectivityObserver
 import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
 import com.codewithdipesh.lyncup.domain.model.ClipBoardData
@@ -33,7 +34,6 @@ actual class DeviceViewModel actual constructor(
         }
         viewModelScope.launch {
             //wifi monitoring
-            checkWifiMonitoring()
             backgroundService.startService()
             observerDevices()
             connectionApproval.requests.collect {request ->
@@ -139,19 +139,7 @@ actual class DeviceViewModel actual constructor(
     }
 
     actual fun checkWifiMonitoring() {
-        //starting observing
-        connectivityObserver.startObserving()
-
-        viewModelScope.launch {
-            connectivityObserver.isConnected.collect { isConnected ->
-                println("Jvm -> isConnected : $isConnected")
-                if (isConnected) {
-                    _state.update { it.copy(isWifiAvailable = true) }
-                } else {
-                    _state.update { it.copy(isWifiAvailable = false) }
-                }
-            }
-        }
+        //no -op for jvm desktops
     }
 
     actual fun stopWifiMonitoring() {

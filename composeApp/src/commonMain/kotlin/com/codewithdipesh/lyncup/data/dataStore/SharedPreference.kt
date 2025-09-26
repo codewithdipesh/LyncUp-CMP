@@ -34,9 +34,15 @@ object SharedPreference {
         val decoded = Json.decodeFromString<Device>(codedDevice ?: return null)
         return decoded
     }
-    fun setConnectedDevice(device: Device) {
+    fun setConnectedDevice(device: Device? = null) {
         val settings = SettingsProvider.settings()
-        val codedDevice = Json.encodeToString(device)
-        settings.putString(CONNECTED_DEVICE_KEY,codedDevice)
+        if(device == null) {
+            settings.remove(CONNECTED_DEVICE_KEY)
+            settings.putBoolean(IS_CONNECTED_KEY,false)
+        }else{
+            val codedDevice = Json.encodeToString(device)
+            settings.putString(CONNECTED_DEVICE_KEY,codedDevice)
+            settings.putBoolean(IS_CONNECTED_KEY,true)
+        }
     }
 }

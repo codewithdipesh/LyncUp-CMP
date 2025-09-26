@@ -59,17 +59,14 @@ class ServerManager {
         onConnect: (String) -> Unit
     ) {
         try {
-            clientSocket.soTimeout = 30000 // ✅ Longer timeout for user decision
-
-            // Read handshake
+            clientSocket.soTimeout = 30000
             val reader = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
-            val buf = CharArray(2048)
-            val n = reader.read(buf)
-            val firstChunk = if (n > 0) String(buf, 0, n) else ""
-            println("Svc: $firstChunk")
-            val hello = if (firstChunk.startsWith("HELLO:")) {
+            val firstLine = reader.readLine()?.trim() ?: ""
+            println("Svc: $firstLine")
+
+            val hello = if (firstLine.startsWith("HELLO:")) {
                 runCatching {
-                    val json = firstChunk.removePrefix("HELLO:")
+                    val json = firstLine.removePrefix("HELLO:")
                     Json.decodeFromString<HandShake>(json)
                 }.getOrNull()
             } else null
@@ -80,32 +77,24 @@ class ServerManager {
                 return
             }
 
-            //proper waiting
             val decision = CompletableFuture<Boolean>()
-            onRequest(hello) { approved ->
-                decision.complete(approved)
-            }
+            onRequest(hello) { approved -> decision.complete(approved) }
 
-            //Wait for user decision
             val approved = withContext(Dispatchers.IO) {
-                decision.get(30, TimeUnit.SECONDS) // 30 second timeout
+                decision.get(30, TimeUnit.SECONDS)
             }
 
             if (!approved) {
                 clientSocket.getOutputStream().write("REJECTED\n".toByteArray())
                 clientSocket.close()
-                return //Exit completely if rejected
+                return
             }
 
-            //Only reach here if approved
             clientSocket.getOutputStream().write("ACCEPTED\n".toByteArray())
             clients.add(clientSocket)
             val clientAddress = clientSocket.inetAddress.hostAddress ?: "unknown"
             onConnect(clientAddress)
-
-            // Now handle client messages
             handleClient(clientSocket, clientAddress)
-
         } catch (e: TimeoutException) {
             println("Connection timeout - no user response")
             clientSocket.close()

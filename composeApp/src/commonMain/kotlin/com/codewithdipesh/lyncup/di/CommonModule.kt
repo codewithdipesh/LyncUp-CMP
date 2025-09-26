@@ -11,6 +11,7 @@ import com.codewithdipesh.lyncup.data.repository.DeviceRepositoryImpl
 import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
 import com.codewithdipesh.lyncup.domain.repository.ClipboardRepository
 import com.codewithdipesh.lyncup.domain.repository.DeviceRepository
+import com.codewithdipesh.lyncup.presentation.dashboard.SessionCheckViewModel
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -38,7 +39,8 @@ val commonModule = module {
     single<DeviceRepository> {
         DeviceRepositoryImpl(
             discoveryService = get(),
-            socketManager = get()
+            socketManager = get(),
+            sharedPref = get()
         )
     }
 
@@ -55,7 +57,12 @@ val commonModule = module {
             deviceRepository = get(),
             clipboardRepository = get(),
             backgroundService = get(),
-            connectivityObserver = get()
+            connectivityObserver = get(),
+        )
+    }
+    viewModel {
+        SessionCheckViewModel(
+            repo = get()
         )
     }
 }

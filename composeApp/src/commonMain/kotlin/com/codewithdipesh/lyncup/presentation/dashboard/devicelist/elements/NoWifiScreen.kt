@@ -33,7 +33,6 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun NoWifiScreen(
-    platform: PlatformType,
     onAction: () -> Unit
 ){
     Column(
@@ -77,28 +76,26 @@ fun NoWifiScreen(
             )
         )
         Spacer(Modifier.height(24.dp))
-        if(platform == PlatformType.MOBILE){
-            Box(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.primary)
-                    .clickable{
-                        onAction()
-                    },
-                contentAlignment = Alignment.Center
-            ){
-                Text(
-                    text = "Connect to Wifi",
-                    style = TextStyle(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontFamily = regular,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    ),
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
+        Box(
+            modifier = Modifier
+                .wrapContentSize()
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.primary)
+                .clickable{
+                    onAction()
+                },
+            contentAlignment = Alignment.Center
+        ){
+            Text(
+                text = "Connect to Wifi",
+                style = TextStyle(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontFamily = regular,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                ),
+                modifier = Modifier.padding(16.dp)
+            )
         }
     }
 }

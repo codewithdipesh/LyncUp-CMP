@@ -1,5 +1,6 @@
 package com.codewithdipesh.lyncup.data.repository
 
+import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.data.network.DeviceDiscoveryService
 import com.codewithdipesh.lyncup.data.network.SocketManager
 import com.codewithdipesh.lyncup.domain.model.ClipBoardData
@@ -11,7 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class DeviceRepositoryImpl(
     private val discoveryService : DeviceDiscoveryService,
-    private val socketManager: SocketManager
+    private val socketManager: SocketManager,
+    private val sharedPref: SharedPreference
 ): DeviceRepository {
 
     private val _deviceFlow = MutableStateFlow<List<Device>>(emptyList())
@@ -44,6 +46,7 @@ class DeviceRepositoryImpl(
         val connected = socketManager.connectToDevice(device)
         if(connected) {
             connectedDevice = device
+            sharedPref.setConnectedDevice(device)
             updateDeviceConnectionStatus(device,true)
         }
         return connected
@@ -62,6 +65,7 @@ class DeviceRepositoryImpl(
         socketManager.disconnect()
         if(connectedDevice?.id == device.id){
             connectedDevice = null
+            sharedPref.setConnectedDevice(null)
         }
         updateDeviceConnectionStatus(device,false)
         return true
@@ -84,6 +88,23 @@ class DeviceRepositoryImpl(
     override suspend fun syncClipboard(onReceived: (ClipBoardData) -> Unit) {
         socketManager.syncClipboard {
             onReceived(it)
+        }
+    }
+
+    override suspend fun checkPrevSession() : Boolean {
+        //check saved in sharedPref
+        return if(sharedPref.isConnected()){
+            //ping to socket
+            val connectedDevice = sharedPref.getConnectedDevice()
+            val isRunning = socketManager.ping(connectedDevice!!)
+            if(isRunning){
+                true
+            }else{
+                sharedPref.setConnectedDevice(null)
+                false
+            }
+        }else{
+            false
         }
     }
 }

@@ -53,38 +53,38 @@ actual class SocketManager actual constructor(){
             try {
                 serverManager.startServer(
                     port = 8888,
-                    onRequest = { info, decide ->
-                        onRequest(info,decide)
-                    },
-                    onMessage = {message ->
+                    onRequest = { info, decide -> onRequest(info, decide) },
+                    onMessage = { message ->
+                        val m = message.trim()
                         when {
-                            message.startsWith("CLIPBOARD:") -> {
-                                try {
+                            m.startsWith("CLIPBOARD:") -> {
+                                runCatching {
                                     val clipboardData = Json.decodeFromString<ClipBoardData>(
-                                        message.substringAfter("CLIPBOARD:")
+                                        m.substringAfter("CLIPBOARD:")
                                     )
                                     onClipboardReceived(clipboardData)
-                                } catch (e: Exception) {
+                                }.onFailure { e ->
                                     println("Failed to parse clipboard data: ${e.message}")
                                 }
                             }
-                            message == "PING" -> {
+
+                            m == "PING" -> {
                                 val id = SharedPreference.getOrCreateDeviceId()
                                 serverManager.sendMessageToAll("PONG:$id")
                             }
-                            message == "PONG" -> {
-                                val deviceId = message.substringAfter("PONG:")
+
+                            m.startsWith("PONG:") -> {
+                                val deviceId = m.substringAfter("PONG:")
                                 pendingPings[deviceId]?.complete(true)
                                 pendingPings.remove(deviceId)
                             }
-                            else -> {
-                                println("Received message: $message")
-                            }
+
+                            else -> println("Received message: $m")
                         }
                     }
                 )
                 true
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 false
             }
         }
@@ -102,7 +102,7 @@ actual class SocketManager actual constructor(){
                 pendingPings[device.id] = pingResponse
 
                 // Send PING message
-                serverManager.sendMessageToAll("PING")
+                serverManager.sendMessageToAll("PING\n")
                 // Wait for PONG
                 withTimeoutOrNull(5000) { // 5 second timeout
                     pingResponse.await()

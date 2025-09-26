@@ -103,7 +103,7 @@ fun DeviceConnectionContent(
             .fillMaxSize()
             .padding(it)
         ){
-            if(state.isWifiAvailable){
+            if(state.isWifiAvailable || platform == PlatformType.DESKTOP){
                 Column(
                     modifier = Modifier
                         .fillMaxSize(),
@@ -228,7 +228,6 @@ fun DeviceConnectionContent(
                 }
             }else{
                 NoWifiScreen(
-                    platform = platform,
                     onAction = {
                         onAction(DeviceListAction.GoToWifiSettings)
                     }
