@@ -2,6 +2,7 @@ package com.codewithdipesh.lyncup.domain.model
 
 import kotlinx.serialization.Serializable
 
+@Serializable
 data class Device(
     val id : String,
     val name : String,

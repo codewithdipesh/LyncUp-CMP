@@ -72,4 +72,8 @@ actual class LyncUpBackgroundService actual constructor(
             clipboardRepository.stopClipboardMonitoring()
         }
     }
+
+    actual fun isServiceRunning(): Boolean {
+        return isServerRunning
+    }
 }

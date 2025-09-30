@@ -13,11 +13,14 @@ actual class LyncUpBackgroundService actual constructor(
     private val clipboardRepository: ClipboardRepository
 ) {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var isRunning = false
 
     //it will be called when connection is successfully done
     //only start clipboard monitoring and send to other device
     //set clipboard received from other device
     actual fun startService() {
+        if(isRunning) return
+        isRunning = true
         serviceScope.launch {
             //received
             deviceRepository.syncClipboard { data->
@@ -31,6 +34,11 @@ actual class LyncUpBackgroundService actual constructor(
     }
     actual fun stopService() {
         serviceScope.cancel()
+        isRunning = false
         clipboardRepository.stopClipboardMonitoring()
+    }
+
+    actual fun isServiceRunning(): Boolean {
+        return isRunning
     }
 }

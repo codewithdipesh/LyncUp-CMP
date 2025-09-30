@@ -14,6 +14,8 @@ import kotlinx.serialization.json.Json
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 actual class SocketManager actual constructor() {
     private var socket: Socket? = null
@@ -28,7 +30,10 @@ actual class SocketManager actual constructor() {
                 val hello = HandShake(
                     id = SharedPreference.getOrCreateDeviceId(),
                     name = getPlatform().name,
-                    deviceType = DeviceType.ANDROID
+                    deviceType = DeviceType.ANDROID,
+                    ip = socket?.localAddress?.hostAddress ?: "",
+                    port = socket?.localPort ?: 0,
+                    lastSeen = System.currentTimeMillis()
                 )
                 val json = Json.encodeToString(hello)
                 socket?.getOutputStream()?.write("HELLO:$json\n".toByteArray())
@@ -108,6 +113,7 @@ actual class SocketManager actual constructor() {
                 tmp.getOutputStream().write("PING\n".toByteArray())
                 val reply = BufferedReader(InputStreamReader(tmp.getInputStream())).readLine()
                 //return
+                println("PING reply: $reply")
                 reply != null && reply.startsWith("PONG:")
                         && reply.removePrefix("PONG:") == device.id
             } catch (e: Exception) {

@@ -7,7 +7,7 @@ sealed class DeviceListAction {
     object StopDiscovery : DeviceListAction()
     data class ConnectToDevice(val device: Device) : DeviceListAction()
     data class DisconnectFromDevice(val device: Device) : DeviceListAction()
-    object ApproveConnection : DeviceListAction()
+    data class ApproveConnection(val device: Device) : DeviceListAction()
     object RejectConnection : DeviceListAction()
     object GoToWifiSettings : DeviceListAction()
 }

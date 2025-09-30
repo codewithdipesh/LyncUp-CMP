@@ -21,7 +21,8 @@ actual class DeviceViewModel actual constructor(
     private val deviceRepository: DeviceRepository,
     private val clipboardRepository: ClipboardRepository,
     private val backgroundService: LyncUpBackgroundService,
-    private val connectivityObserver: ConnectivityObserver
+    private val connectivityObserver: ConnectivityObserver,
+    private val sharedPreferences: SharedPreference
 ) : ViewModel() {
 
     private val connectionApproval: ConnectionApprovalCoordinator by inject(ConnectionApprovalCoordinator::class.java)
@@ -52,7 +53,7 @@ actual class DeviceViewModel actual constructor(
             is DeviceListAction.ConnectToDevice -> {}//not for desktop
             is DeviceListAction.DisconnectFromDevice -> disconnectFromDevice(action.device)
             DeviceListAction.StartDiscovery -> startDiscovery()
-            DeviceListAction.ApproveConnection -> {
+            is DeviceListAction.ApproveConnection -> {
                 connectionApproval.approve()
                 _state.update {
                     it.copy(
@@ -60,6 +61,9 @@ actual class DeviceViewModel actual constructor(
                         isDiscovering = false
                     )
                 }
+                //sharedPref Update
+                sharedPreferences.setConnectedDevice(action.device)
+
             }
             DeviceListAction.RejectConnection -> {
                 connectionApproval.reject()

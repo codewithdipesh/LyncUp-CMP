@@ -58,6 +58,7 @@ val commonModule = module {
             clipboardRepository = get(),
             backgroundService = get(),
             connectivityObserver = get(),
+            sharedPreferences = get()
         )
     }
     viewModel {

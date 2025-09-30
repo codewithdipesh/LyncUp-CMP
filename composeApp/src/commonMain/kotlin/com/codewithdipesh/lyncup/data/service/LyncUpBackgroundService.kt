@@ -9,4 +9,6 @@ expect class LyncUpBackgroundService(
 ) {
     fun startService()
     fun stopService()
+
+    fun isServiceRunning(): Boolean
 }

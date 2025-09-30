@@ -1,6 +1,7 @@
 package com.codewithdipesh.lyncup.presentation.dashboard.devicelist
 
 import androidx.lifecycle.ViewModel
+import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.data.network.ConnectivityObserver
 import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
 import com.codewithdipesh.lyncup.domain.model.Device
@@ -12,7 +13,8 @@ expect class DeviceViewModel(
     deviceRepository: DeviceRepository,
     clipboardRepository: ClipboardRepository,
     backgroundService: LyncUpBackgroundService,
-    connectivityObserver: ConnectivityObserver
+    connectivityObserver: ConnectivityObserver,
+    sharedPreferences: SharedPreference
 ) : ViewModel {
     val state: StateFlow<DeviceListUI>
 

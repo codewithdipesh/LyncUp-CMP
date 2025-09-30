@@ -59,7 +59,10 @@ class ServerManager {
         onConnect: (String) -> Unit
     ) {
         try {
-            clientSocket.soTimeout = 30000
+            clientSocket.soTimeout = 30000  // 30 second read timeout
+            clientSocket.keepAlive = true   // Enable TCP keep-alive
+            clientSocket.tcpNoDelay = true
+
             val reader = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
             val firstLine = reader.readLine()?.trim() ?: ""
             println("Svc: $firstLine")
@@ -117,14 +120,15 @@ class ServerManager {
 
     private fun handleClient(clientSocket: Socket, clientAddress: String) {
         try {
+            clientSocket.soTimeout = 30000
             val reader = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
-            val buffer = CharArray(1024)
 
             while (!clientSocket.isClosed) {
-                val bytesRead = reader.read(buffer)
-                if (bytesRead == -1) break
-
-                val message = String(buffer, 0, bytesRead)
+                val message = reader.readLine() // This will now timeout after 30 seconds
+                if (message == null) {
+                    println("Client disconnected normally: $clientAddress")
+                    break
+                }
                 onMessageReceived?.invoke(message)
             }
         } catch (e: Exception) {

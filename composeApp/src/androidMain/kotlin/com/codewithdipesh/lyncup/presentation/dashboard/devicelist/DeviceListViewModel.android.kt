@@ -22,7 +22,8 @@ actual class DeviceViewModel actual constructor(
     private val deviceRepository: DeviceRepository,
     private val clipboardRepository: ClipboardRepository,
     private val backgroundService: LyncUpBackgroundService,
-    private val connectivityObserver: ConnectivityObserver
+    private val connectivityObserver: ConnectivityObserver,
+    private val sharedPreferences: SharedPreference
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DeviceListUI())
@@ -42,7 +43,7 @@ actual class DeviceViewModel actual constructor(
             is DeviceListAction.DisconnectFromDevice -> disconnectFromDevice(action.device)
             DeviceListAction.StartDiscovery -> startDiscovery()
             DeviceListAction.StopDiscovery -> stopDiscovery()
-            DeviceListAction.ApproveConnection -> {} //no -op for mobile
+            is DeviceListAction.ApproveConnection -> {} //no -op for mobile
             DeviceListAction.RejectConnection -> {}
             DeviceListAction.GoToWifiSettings -> goToWifiSettings()
         }
@@ -90,6 +91,7 @@ actual class DeviceViewModel actual constructor(
             )
         }
         return try {
+            //also save it if selected
             val connected = deviceRepository.connectToDevice(device)
             if(connected){
                 _state.update {
@@ -99,6 +101,7 @@ actual class DeviceViewModel actual constructor(
                 //stop discovery
                 //start service
                 stopDiscovery()
+
                 backgroundService.startService()
             } else {
                 _state.update {

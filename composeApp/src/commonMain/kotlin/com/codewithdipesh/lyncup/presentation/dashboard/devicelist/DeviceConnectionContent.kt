@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,6 +29,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -40,9 +42,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.navigator.Navigator
 import com.codewithdipesh.lyncup.Platform
 import com.codewithdipesh.lyncup.Res
 import com.codewithdipesh.lyncup.domain.model.PlatformType
+import com.codewithdipesh.lyncup.domain.model.toDevice
 import com.codewithdipesh.lyncup.more_icon
 import com.codewithdipesh.lyncup.no_user_found
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.CustomSnackbar
@@ -50,6 +54,8 @@ import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.DisC
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.NoWifiScreen
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.ScannedDevice
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.elements.TopBar
+import com.codewithdipesh.lyncup.presentation.dashboard.session.SessionScreen
+import com.codewithdipesh.lyncup.presentation.navigation.Screen
 import com.codewithdipesh.lyncup.presentation.ui.regular
 import com.codewithdipesh.lyncup.scan_icon
 import com.codewithdipesh.lyncup.scanning_icon
@@ -63,7 +69,8 @@ import org.jetbrains.compose.resources.painterResource
 fun DeviceConnectionContent(
     state : DeviceListUI,
     onAction : (DeviceListAction) -> Unit,
-    platform: PlatformType
+    platform: PlatformType,
+    navigator : Navigator
 ){
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -170,7 +177,9 @@ fun DeviceConnectionContent(
                                 ScannedDevice(
                                     device = it,
                                     platform = platform,
-                                    onConnectClick = { onAction(DeviceListAction.ConnectToDevice(it)) }
+                                    onConnectClick = {
+                                        onAction(DeviceListAction.ConnectToDevice(device = it))
+                                    }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
@@ -247,6 +256,30 @@ fun DeviceConnectionContent(
                 )
             }
 
+        }
+
+        //only for desktop
+        if(platform == PlatformType.DESKTOP){
+            state.pendingRequest?.let { req ->
+                AlertDialog(
+                    onDismissRequest = { /* block dismiss */ },
+                    title = { Text("Connection request") },
+                    text = { Text("${req.name} wants to connect") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { scope.launch {
+                                onAction(DeviceListAction.ApproveConnection(req.toDevice()))
+                                navigator.replaceAll(Screen.SessionScreen)
+                            } }
+                        ) { Text("Approve") }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { scope.launch { onAction(DeviceListAction.RejectConnection) } }
+                        ) { Text("Reject") }
+                    }
+                )
+            }
         }
     }
 
