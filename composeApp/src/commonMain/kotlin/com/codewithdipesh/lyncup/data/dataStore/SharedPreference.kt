@@ -24,6 +24,7 @@ object SharedPreference {
     fun isConnected() : Boolean {
         val settings = SettingsProvider.settings()
         val existing = settings.getBooleanOrNull(IS_CONNECTED_KEY)
+        println("Getting isConnected : $existing")
         if(existing != null) return existing
         return false
     }
@@ -32,9 +33,11 @@ object SharedPreference {
         val settings = SettingsProvider.settings()
         val codedDevice =  settings.getStringOrNull(CONNECTED_DEVICE_KEY)
         val decoded = Json.decodeFromString<Device>(codedDevice ?: return null)
+        println("Getting connected device:$decoded")
         return decoded
     }
     fun setConnectedDevice(device: Device? = null) {
+        println("Setting connected device: $device")
         val settings = SettingsProvider.settings()
         if(device == null) {
             settings.remove(CONNECTED_DEVICE_KEY)

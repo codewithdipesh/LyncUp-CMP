@@ -13,10 +13,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.tooling.preview.Preview
 import com.codewithdipesh.lyncup.domain.model.PlatformType
-import com.codewithdipesh.lyncup.presentation.dashboard.HomeScreen
 import com.codewithdipesh.lyncup.presentation.dashboard.SessionCheckViewModel
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceConnectionContent
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceViewModel
+import com.codewithdipesh.lyncup.presentation.navigation.AppNavHost
 import com.codewithdipesh.lyncup.presentation.ui.LyncUpTheme
 import kotlinx.coroutines.launch
 import org.koin.compose.KoinContext
@@ -30,11 +30,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             KoinContext {
                 LyncUpTheme {
-                    val authViewModel : SessionCheckViewModel = koinViewModel()
-                    val deviceViewModel: DeviceViewModel = koinViewModel()
-                    HomeScreen(
-                        authViewModel = authViewModel,
-                        deviceViewModel = deviceViewModel,
+                    AppNavHost(
                         platformType = PlatformType.MOBILE
                     )
                 }

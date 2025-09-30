@@ -47,6 +47,7 @@ class DeviceRepositoryImpl(
         if(connected) {
             connectedDevice = device
             sharedPref.setConnectedDevice(device)
+            println("Device connected: ${device.name}")
             updateDeviceConnectionStatus(device,true)
         }
         return connected
@@ -97,6 +98,7 @@ class DeviceRepositoryImpl(
             //ping to socket
             val connectedDevice = sharedPref.getConnectedDevice()
             val isRunning = socketManager.ping(connectedDevice!!)
+            println("check Server: $isRunning")
             if(isRunning){
                 true
             }else{

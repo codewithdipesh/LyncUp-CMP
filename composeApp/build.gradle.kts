@@ -65,6 +65,10 @@ kotlin {
             implementation("io.insert-koin:koin-compose-viewmodel:4.0.0")
             // ViewModel support for KMP
             implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.8.2")
+            //navigation support for kmp
+            implementation("cafe.adriel.voyager:voyager-navigator:1.0.0")
+            implementation("cafe.adriel.voyager:voyager-transitions:1.0.0")
+            implementation("cafe.adriel.voyager:voyager-koin:1.0.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -116,7 +120,7 @@ compose.desktop {
         mainClass = "com.codewithdipesh.lyncup.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
             packageName = "com.codewithdipesh.lyncup"
             packageVersion = "1.0.0"
             includeAllModules = true
