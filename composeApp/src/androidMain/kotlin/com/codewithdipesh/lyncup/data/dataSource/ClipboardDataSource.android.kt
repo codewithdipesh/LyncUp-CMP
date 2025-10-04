@@ -3,6 +3,7 @@ package com.codewithdipesh.lyncup.data.dataSource
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.util.Log
 import com.codewithdipesh.lyncup.AppContextHolder
 import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.domain.model.ClipBoardData
@@ -46,6 +47,7 @@ actual class ClipboardDataSource actual constructor() {
                 while (isActive) {
                     try {
                         val currentText = getClipboard()
+                        Log.d("Clipboard", "$currentText")
                         if (currentText != null && currentText != lastText) {
                             lastText = currentText
                             onChanged(

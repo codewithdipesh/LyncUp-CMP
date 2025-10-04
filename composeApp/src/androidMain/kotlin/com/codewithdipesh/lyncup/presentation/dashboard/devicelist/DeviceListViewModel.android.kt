@@ -1,13 +1,13 @@
 package com.codewithdipesh.lyncup.presentation.dashboard.devicelist
 
 import android.content.Intent
-import androidx.compose.ui.text.font.FontVariation.Settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codewithdipesh.lyncup.AppContextHolder
 import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.data.network.ConnectivityObserver
-import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
+import com.codewithdipesh.lyncup.data.service.LyncUpService
+import com.codewithdipesh.lyncup.data.service.LyncUpForegroundService
 import com.codewithdipesh.lyncup.domain.model.Device
 import com.codewithdipesh.lyncup.domain.repository.ClipboardRepository
 import com.codewithdipesh.lyncup.domain.repository.DeviceRepository
@@ -21,13 +21,14 @@ import kotlinx.coroutines.launch
 actual class DeviceViewModel actual constructor(
     private val deviceRepository: DeviceRepository,
     private val clipboardRepository: ClipboardRepository,
-    private val backgroundService: LyncUpBackgroundService,
+    private val backgroundService: LyncUpService,
     private val connectivityObserver: ConnectivityObserver,
     private val sharedPreferences: SharedPreference
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DeviceListUI())
     actual val state: StateFlow<DeviceListUI> = _state.asStateFlow()
+    val context = AppContextHolder.context
 
     private var observingJob: Job? = null
 
@@ -102,7 +103,7 @@ actual class DeviceViewModel actual constructor(
                 //start service
                 stopDiscovery()
 
-                backgroundService.startService()
+                context.startService(Intent(context, LyncUpForegroundService::class.java))
             } else {
                 _state.update {
                     it.copy(
@@ -133,7 +134,7 @@ actual class DeviceViewModel actual constructor(
                 it.copy(error = e.message)
             }
         }
-        backgroundService.stopService()
+        stopService()
     }
 
     fun clearError() {
@@ -186,5 +187,9 @@ actual class DeviceViewModel actual constructor(
         val intent = Intent(android.provider.Settings.ACTION_WIFI_SETTINGS)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
+    }
+
+    private fun stopService(){
+        context.stopService(Intent(context, LyncUpForegroundService::class.java))
     }
 }

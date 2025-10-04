@@ -100,7 +100,8 @@ actual class SocketManager actual constructor() {
     //not needed for mobile
     actual suspend fun startServer(
         onRequest: (HandShake, (Boolean) -> Unit) -> Unit,
-        onClipboardReceived: (ClipBoardData) -> Unit
+        onClipboardReceived: (ClipBoardData) -> Unit,
+        onError: () -> Unit
     ): Boolean = false
     actual suspend fun stopServer() {}
     actual fun isServerRunning(): Boolean = false

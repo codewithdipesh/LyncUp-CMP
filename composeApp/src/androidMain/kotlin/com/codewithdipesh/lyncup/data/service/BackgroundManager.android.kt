@@ -8,7 +8,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-actual class LyncUpBackgroundService actual constructor(
+actual class LyncUpService actual constructor(
     private val deviceRepository: DeviceRepository,
     private val clipboardRepository: ClipboardRepository
 ) {

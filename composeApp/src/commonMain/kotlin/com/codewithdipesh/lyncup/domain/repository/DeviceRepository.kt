@@ -13,7 +13,8 @@ interface DeviceRepository {
     suspend fun disconnectFromDevice(device: Device) : Boolean
     suspend fun startServer(
         onRequest: (HandShake, (Boolean) -> Unit) -> Unit,
-        onClipboardReceived: (ClipBoardData) -> Unit
+        onClipboardReceived: (ClipBoardData) -> Unit,
+        onError: () -> Unit = {}
     ) : Boolean
     suspend fun stopServer()
     suspend fun syncClipboard(onReceived: (ClipBoardData) -> Unit)

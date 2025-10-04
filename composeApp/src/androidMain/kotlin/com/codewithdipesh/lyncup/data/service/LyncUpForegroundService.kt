@@ -9,11 +9,11 @@ import org.koin.android.ext.android.get
 
 // In androidMain
 class LyncUpForegroundService : Service() {
-    private lateinit var lyncUpService: LyncUpBackgroundService
+    private lateinit var lyncUpService: LyncUpService
     
     override fun onCreate() {
         super.onCreate()
-        lyncUpService = LyncUpBackgroundService(
+        lyncUpService = LyncUpService(
             deviceRepository = get(),
             clipboardRepository = get()
         )
@@ -37,6 +37,7 @@ class LyncUpForegroundService : Service() {
             .setContentTitle("LyncUp Running")
             .setContentText("Syncing...")
             .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
     }
 }

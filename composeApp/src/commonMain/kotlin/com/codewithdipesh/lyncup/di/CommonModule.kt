@@ -8,7 +8,7 @@ import com.codewithdipesh.lyncup.data.network.DeviceDiscoveryService
 import com.codewithdipesh.lyncup.data.network.SocketManager
 import com.codewithdipesh.lyncup.data.repository.ClipboardRepositoryImpl
 import com.codewithdipesh.lyncup.data.repository.DeviceRepositoryImpl
-import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
+import com.codewithdipesh.lyncup.data.service.LyncUpService
 import com.codewithdipesh.lyncup.domain.repository.ClipboardRepository
 import com.codewithdipesh.lyncup.domain.repository.DeviceRepository
 import com.codewithdipesh.lyncup.presentation.dashboard.SessionCheckViewModel
@@ -46,7 +46,7 @@ val commonModule = module {
 
     //background service
     single {
-        LyncUpBackgroundService(
+        LyncUpService(
         deviceRepository = get(),
         clipboardRepository = get()
     )}

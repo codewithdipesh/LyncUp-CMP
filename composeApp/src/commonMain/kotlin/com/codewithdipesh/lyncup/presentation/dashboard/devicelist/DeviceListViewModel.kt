@@ -3,7 +3,7 @@ package com.codewithdipesh.lyncup.presentation.dashboard.devicelist
 import androidx.lifecycle.ViewModel
 import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.data.network.ConnectivityObserver
-import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
+import com.codewithdipesh.lyncup.data.service.LyncUpService
 import com.codewithdipesh.lyncup.domain.model.Device
 import com.codewithdipesh.lyncup.domain.repository.ClipboardRepository
 import com.codewithdipesh.lyncup.domain.repository.DeviceRepository
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 expect class DeviceViewModel(
     deviceRepository: DeviceRepository,
     clipboardRepository: ClipboardRepository,
-    backgroundService: LyncUpBackgroundService,
+    backgroundService: LyncUpService,
     connectivityObserver: ConnectivityObserver,
     sharedPreferences: SharedPreference
 ) : ViewModel {

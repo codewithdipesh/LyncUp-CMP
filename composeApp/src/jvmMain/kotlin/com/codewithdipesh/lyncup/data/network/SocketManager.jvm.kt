@@ -47,13 +47,15 @@ actual class SocketManager actual constructor(){
 
     actual suspend fun startServer(
         onRequest: (HandShake, (Boolean) -> Unit) -> Unit,
-        onClipboardReceived: (ClipBoardData) -> Unit
+        onClipboardReceived: (ClipBoardData) -> Unit,
+        onError: () -> Unit
     ): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 serverManager.startServer(
                     port = 8888,
                     onRequest = { info, decide -> onRequest(info, decide) },
+                    onError = onError,
                     onMessage = { message ->
                         val m = message.trim()
                         when {
@@ -85,6 +87,7 @@ actual class SocketManager actual constructor(){
                 )
                 true
             } catch (e: Exception) {
+                onError()
                 false
             }
         }

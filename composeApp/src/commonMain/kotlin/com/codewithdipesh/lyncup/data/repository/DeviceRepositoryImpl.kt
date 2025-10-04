@@ -10,7 +10,7 @@ import com.codewithdipesh.lyncup.domain.repository.DeviceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class DeviceRepositoryImpl(
+ class DeviceRepositoryImpl(
     private val discoveryService : DeviceDiscoveryService,
     private val socketManager: SocketManager,
     private val sharedPref: SharedPreference
@@ -74,11 +74,13 @@ class DeviceRepositoryImpl(
 
     override suspend fun startServer(
         onRequest: (HandShake, (Boolean) -> Unit) -> Unit,
-        onClipboardReceived: (ClipBoardData) -> Unit
+        onClipboardReceived: (ClipBoardData) -> Unit,
+        onError: () -> Unit
     ): Boolean {
         return socketManager.startServer(
             onRequest,
-            onClipboardReceived
+            onClipboardReceived,
+            onError
         )
     }
 

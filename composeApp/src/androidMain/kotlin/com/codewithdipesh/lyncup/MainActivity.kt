@@ -1,5 +1,7 @@
 package com.codewithdipesh.lyncup
 
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -12,6 +14,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.codewithdipesh.lyncup.domain.model.PlatformType
 import com.codewithdipesh.lyncup.presentation.dashboard.SessionCheckViewModel
 import com.codewithdipesh.lyncup.presentation.dashboard.devicelist.DeviceConnectionContent
@@ -30,6 +34,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             KoinContext {
                 LyncUpTheme {
+                    if(Build.VERSION.SDK_INT >= 33 &&
+                        ContextCompat.checkSelfPermission(
+                            this, android.Manifest.permission.POST_NOTIFICATIONS
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
+                    }
                     AppNavHost(
                         platformType = PlatformType.MOBILE
                     )

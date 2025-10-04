@@ -26,19 +26,22 @@ class ServerManager {
     private var onMessageReceived: ((String) -> Unit)? = null
     private var onClientConnected: ((String) -> Unit)? = null
     private var onClientDisconnected: ((String) -> Unit)? = null
+    private var onConnectionError: (() -> Unit)? = null
 
     fun startServer(
         port:Int = 8888,
         onMessage : (String) -> Unit = {},
         onRequest : (HandShake , (Boolean) -> Unit) -> Unit = {_,decide -> decide(true)},
         onConnect: (String) -> Unit = {},
-        onDisconnect: (String) -> Unit = {}
+        onDisconnect: (String) -> Unit = {},
+        onError: () -> Unit = {}
     ){
         if(serverSocket != null ) return
 
         onMessageReceived = onMessage
         onClientConnected = onConnect
         onClientDisconnected = onDisconnect
+        onConnectionError = onError
 
         serverJob = scope.launch {
             try {
@@ -49,6 +52,7 @@ class ServerManager {
                 }
             } catch (e: Exception) {
                 println("Server error: ${e.message}")
+                onConnectionError?.invoke()
             }
         }
     }
@@ -94,16 +98,23 @@ class ServerManager {
             }
 
             clientSocket.getOutputStream().write("ACCEPTED\n".toByteArray())
+
+            clientSocket.soTimeout = 0
+            clientSocket.keepAlive = true
+            clientSocket.tcpNoDelay = true
             clients.add(clientSocket)
+
             val clientAddress = clientSocket.inetAddress.hostAddress ?: "unknown"
             onConnect(clientAddress)
             handleClient(clientSocket, clientAddress)
         } catch (e: TimeoutException) {
             println("Connection timeout - no user response")
             clientSocket.close()
+            onConnectionError?.invoke()
         } catch (e: Exception) {
             println("Connection error: ${e.message}")
             clientSocket.close()
+            onConnectionError?.invoke()
         }
     }
 
@@ -120,11 +131,10 @@ class ServerManager {
 
     private fun handleClient(clientSocket: Socket, clientAddress: String) {
         try {
-            clientSocket.soTimeout = 30000
+            clientSocket.soTimeout = 0
             val reader = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
-
             while (!clientSocket.isClosed) {
-                val message = reader.readLine() // This will now timeout after 30 seconds
+                val message = reader.readLine()
                 if (message == null) {
                     println("Client disconnected normally: $clientAddress")
                     break
@@ -133,6 +143,7 @@ class ServerManager {
             }
         } catch (e: Exception) {
             println("Error handling client $clientAddress: ${e.message}")
+            onConnectionError?.invoke()
         } finally {
             clients.remove(clientSocket)
             clientSocket.close()

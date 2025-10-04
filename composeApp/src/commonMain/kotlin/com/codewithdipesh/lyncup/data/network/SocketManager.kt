@@ -12,7 +12,8 @@ expect class SocketManager() {
     //Server functionality
     suspend fun startServer(
         onRequest: (HandShake, (Boolean) -> Unit) -> Unit,
-        onClipboardReceived: (ClipBoardData) -> Unit
+        onClipboardReceived: (ClipBoardData) -> Unit,
+        onError: () -> Unit = {}
     ): Boolean
     suspend fun stopServer()
     fun isServerRunning(): Boolean

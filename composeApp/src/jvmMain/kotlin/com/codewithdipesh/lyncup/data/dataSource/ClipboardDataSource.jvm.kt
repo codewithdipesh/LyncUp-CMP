@@ -55,6 +55,7 @@ actual class ClipboardDataSource actual constructor() {
             while (isActive) {
                 try {
                     val currentText = getClipboard()
+                    println("Clipboard" + " $currentText")
                     if (currentText != null && currentText != lastText) {
                         lastText = currentText
                         onChanged(

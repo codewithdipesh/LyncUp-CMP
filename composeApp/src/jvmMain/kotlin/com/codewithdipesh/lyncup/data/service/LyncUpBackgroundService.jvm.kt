@@ -11,7 +11,7 @@ import org.koin.compose.koinInject
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-actual class LyncUpBackgroundService actual constructor(
+actual class LyncUpService actual constructor(
     private val deviceRepository: DeviceRepository,
     private val clipboardRepository: ClipboardRepository
 ) : KoinComponent {
@@ -53,6 +53,9 @@ actual class LyncUpBackgroundService actual constructor(
                 onClipboardReceived = {
                     println("Svc: clipboard received")
                     serviceScope.launch { clipboardRepository.setClipboard(it.text) }
+                },
+                onError = {
+                    println("Svc: connection error occurred")
                 }
             )
             deviceRepository.startDiscovery()

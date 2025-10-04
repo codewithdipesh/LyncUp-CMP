@@ -4,12 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codewithdipesh.lyncup.data.dataStore.SharedPreference
 import com.codewithdipesh.lyncup.data.network.ConnectivityObserver
-import com.codewithdipesh.lyncup.data.service.LyncUpBackgroundService
-import com.codewithdipesh.lyncup.domain.model.ClipBoardData
+import com.codewithdipesh.lyncup.data.service.LyncUpService
 import com.codewithdipesh.lyncup.domain.model.Device
 import com.codewithdipesh.lyncup.domain.repository.ClipboardRepository
 import com.codewithdipesh.lyncup.domain.repository.DeviceRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +18,7 @@ import org.koin.java.KoinJavaComponent.inject
 actual class DeviceViewModel actual constructor(
     private val deviceRepository: DeviceRepository,
     private val clipboardRepository: ClipboardRepository,
-    private val backgroundService: LyncUpBackgroundService,
+    private val backgroundService: LyncUpService,
     private val connectivityObserver: ConnectivityObserver,
     private val sharedPreferences: SharedPreference
 ) : ViewModel() {
